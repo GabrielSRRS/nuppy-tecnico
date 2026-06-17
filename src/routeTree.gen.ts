@@ -20,6 +20,7 @@ import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedComunidadesRouteImport } from './routes/_authenticated/comunidades'
 import { Route as AuthenticatedPetNovoRouteImport } from './routes/_authenticated/pet.novo'
 import { Route as AuthenticatedPetPetIdRouteImport } from './routes/_authenticated/pet.$petId'
+import { Route as AuthenticatedComunidadeSlugRouteImport } from './routes/_authenticated/comunidade.$slug'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -76,6 +77,12 @@ const AuthenticatedPetPetIdRoute = AuthenticatedPetPetIdRouteImport.update({
   path: '/pet/$petId',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedComunidadeSlugRoute =
+  AuthenticatedComunidadeSlugRouteImport.update({
+    id: '/comunidade/$slug',
+    path: '/comunidade/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/social': typeof AuthenticatedSocialRoute
+  '/comunidade/$slug': typeof AuthenticatedComunidadeSlugRoute
   '/pet/$petId': typeof AuthenticatedPetPetIdRoute
   '/pet/novo': typeof AuthenticatedPetNovoRoute
 }
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/social': typeof AuthenticatedSocialRoute
+  '/comunidade/$slug': typeof AuthenticatedComunidadeSlugRoute
   '/pet/$petId': typeof AuthenticatedPetPetIdRoute
   '/pet/novo': typeof AuthenticatedPetNovoRoute
 }
@@ -112,6 +121,7 @@ export interface FileRoutesById {
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
   '/_authenticated/social': typeof AuthenticatedSocialRoute
+  '/_authenticated/comunidade/$slug': typeof AuthenticatedComunidadeSlugRoute
   '/_authenticated/pet/$petId': typeof AuthenticatedPetPetIdRoute
   '/_authenticated/pet/novo': typeof AuthenticatedPetNovoRoute
 }
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/servicos'
     | '/social'
+    | '/comunidade/$slug'
     | '/pet/$petId'
     | '/pet/novo'
   fileRoutesByTo: FileRoutesByTo
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/servicos'
     | '/social'
+    | '/comunidade/$slug'
     | '/pet/$petId'
     | '/pet/novo'
   id:
@@ -151,6 +163,7 @@ export interface FileRouteTypes {
     | '/_authenticated/perfil'
     | '/_authenticated/servicos'
     | '/_authenticated/social'
+    | '/_authenticated/comunidade/$slug'
     | '/_authenticated/pet/$petId'
     | '/_authenticated/pet/novo'
   fileRoutesById: FileRoutesById
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPetPetIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/comunidade/$slug': {
+      id: '/_authenticated/comunidade/$slug'
+      path: '/comunidade/$slug'
+      fullPath: '/comunidade/$slug'
+      preLoaderRoute: typeof AuthenticatedComunidadeSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -250,6 +270,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
+  AuthenticatedComunidadeSlugRoute: typeof AuthenticatedComunidadeSlugRoute
   AuthenticatedPetPetIdRoute: typeof AuthenticatedPetPetIdRoute
   AuthenticatedPetNovoRoute: typeof AuthenticatedPetNovoRoute
 }
@@ -261,6 +282,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedSocialRoute: AuthenticatedSocialRoute,
+  AuthenticatedComunidadeSlugRoute: AuthenticatedComunidadeSlugRoute,
   AuthenticatedPetPetIdRoute: AuthenticatedPetPetIdRoute,
   AuthenticatedPetNovoRoute: AuthenticatedPetNovoRoute,
 }
@@ -276,13 +298,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
