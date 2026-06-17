@@ -13,9 +13,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
+import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedLocalRouteImport } from './routes/_authenticated/local'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedComunidadesRouteImport } from './routes/_authenticated/comunidades'
 import { Route as AuthenticatedPetNovoRouteImport } from './routes/_authenticated/pet.novo'
 import { Route as AuthenticatedPetPetIdRouteImport } from './routes/_authenticated/pet.$petId'
 
@@ -38,6 +40,11 @@ const AuthenticatedSocialRoute = AuthenticatedSocialRouteImport.update({
   path: '/social',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedServicosRoute = AuthenticatedServicosRouteImport.update({
+  id: '/servicos',
+  path: '/servicos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -53,6 +60,12 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedComunidadesRoute =
+  AuthenticatedComunidadesRouteImport.update({
+    id: '/comunidades',
+    path: '/comunidades',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPetNovoRoute = AuthenticatedPetNovoRouteImport.update({
   id: '/pet/novo',
   path: '/pet/novo',
@@ -67,9 +80,11 @@ const AuthenticatedPetPetIdRoute = AuthenticatedPetPetIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/comunidades': typeof AuthenticatedComunidadesRoute
   '/home': typeof AuthenticatedHomeRoute
   '/local': typeof AuthenticatedLocalRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/servicos': typeof AuthenticatedServicosRoute
   '/social': typeof AuthenticatedSocialRoute
   '/pet/$petId': typeof AuthenticatedPetPetIdRoute
   '/pet/novo': typeof AuthenticatedPetNovoRoute
@@ -77,9 +92,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/comunidades': typeof AuthenticatedComunidadesRoute
   '/home': typeof AuthenticatedHomeRoute
   '/local': typeof AuthenticatedLocalRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/servicos': typeof AuthenticatedServicosRoute
   '/social': typeof AuthenticatedSocialRoute
   '/pet/$petId': typeof AuthenticatedPetPetIdRoute
   '/pet/novo': typeof AuthenticatedPetNovoRoute
@@ -89,9 +106,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/comunidades': typeof AuthenticatedComunidadesRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/local': typeof AuthenticatedLocalRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/servicos': typeof AuthenticatedServicosRoute
   '/_authenticated/social': typeof AuthenticatedSocialRoute
   '/_authenticated/pet/$petId': typeof AuthenticatedPetPetIdRoute
   '/_authenticated/pet/novo': typeof AuthenticatedPetNovoRoute
@@ -101,9 +120,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/comunidades'
     | '/home'
     | '/local'
     | '/perfil'
+    | '/servicos'
     | '/social'
     | '/pet/$petId'
     | '/pet/novo'
@@ -111,9 +132,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/comunidades'
     | '/home'
     | '/local'
     | '/perfil'
+    | '/servicos'
     | '/social'
     | '/pet/$petId'
     | '/pet/novo'
@@ -122,9 +145,11 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/comunidades'
     | '/_authenticated/home'
     | '/_authenticated/local'
     | '/_authenticated/perfil'
+    | '/_authenticated/servicos'
     | '/_authenticated/social'
     | '/_authenticated/pet/$petId'
     | '/_authenticated/pet/novo'
@@ -166,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSocialRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/servicos': {
+      id: '/_authenticated/servicos'
+      path: '/servicos'
+      fullPath: '/servicos'
+      preLoaderRoute: typeof AuthenticatedServicosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/perfil': {
       id: '/_authenticated/perfil'
       path: '/perfil'
@@ -187,6 +219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/comunidades': {
+      id: '/_authenticated/comunidades'
+      path: '/comunidades'
+      fullPath: '/comunidades'
+      preLoaderRoute: typeof AuthenticatedComunidadesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pet/novo': {
       id: '/_authenticated/pet/novo'
       path: '/pet/novo'
@@ -205,18 +244,22 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedComunidadesRoute: typeof AuthenticatedComunidadesRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedLocalRoute: typeof AuthenticatedLocalRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
   AuthenticatedPetPetIdRoute: typeof AuthenticatedPetPetIdRoute
   AuthenticatedPetNovoRoute: typeof AuthenticatedPetNovoRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedComunidadesRoute: AuthenticatedComunidadesRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedLocalRoute: AuthenticatedLocalRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedSocialRoute: AuthenticatedSocialRoute,
   AuthenticatedPetPetIdRoute: AuthenticatedPetPetIdRoute,
   AuthenticatedPetNovoRoute: AuthenticatedPetNovoRoute,
