@@ -132,6 +132,24 @@ function PerfilBody() {
         )}
       </section>
 
+      <section className="mt-6 pb-24">
+        <h3 className="font-display text-brand mb-2">❤️ Vídeos curtidos</h3>
+        {likedVideos.length === 0 ? (
+          <div className="rounded-2xl bg-secondary p-5 text-center text-sm text-muted-foreground">
+            Você ainda não curtiu nenhum vídeo
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-1">
+            {likedVideos.map((v) => (
+              <div key={v.id} className="aspect-square bg-black overflow-hidden rounded-md relative">
+                <video src={v.media_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                <div className="absolute bottom-1 right-1 text-white text-xs bg-black/60 rounded px-1">▶</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
       {editing && <EditModal profile={profile} onClose={() => setEditing(false)} />}
     </div>
   );
