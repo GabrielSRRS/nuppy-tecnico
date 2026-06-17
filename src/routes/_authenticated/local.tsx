@@ -45,7 +45,7 @@ const CAT_EMOJI: Record<string, string> = {
 
 declare global {
   interface Window {
-    google?: typeof google;
+    google?: any;
     __nuppyInitMap?: () => void;
   }
 }
@@ -70,8 +70,8 @@ function LocalPage() {
 function MapBody() {
   const { data: places } = useSuspenseQuery(placesQuery);
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
+  const mapInstance = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
   const [ready, setReady] = useState(false);
   const [selected, setSelected] = useState<Place | null>(null);
   const [adding, setAdding] = useState<{ lat: number; lng: number } | null>(null);
@@ -92,7 +92,7 @@ function MapBody() {
   useEffect(() => {
     if (!ready || !mapRef.current || mapInstance.current) return;
     const center = { lat: -23.5505, lng: -46.6333 }; // São Paulo default
-    mapInstance.current = new google.maps.Map(mapRef.current, {
+    mapInstance.current = new window.google.maps.Map(mapRef.current, {
       center, zoom: 12, disableDefaultUI: true, zoomControl: true,
     });
 
@@ -106,7 +106,7 @@ function MapBody() {
     }
 
     // Long press / right click to add a place
-    mapInstance.current.addListener("click", (e: google.maps.MapMouseEvent) => {
+    mapInstance.current.addListener("click", (e: any) => {
       if (!e.latLng) return;
       setAdding({ lat: e.latLng.lat(), lng: e.latLng.lng() });
     });
@@ -117,7 +117,7 @@ function MapBody() {
     if (!ready || !mapInstance.current) return;
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = places.map((p) => {
-      const marker = new google.maps.Marker({
+      const marker = new window.google.maps.Marker({
         position: { lat: p.lat, lng: p.lng },
         map: mapInstance.current!,
         title: p.name,
