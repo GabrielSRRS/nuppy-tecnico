@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, Suspense } from "react";
-import { Heart, MessageCircle, Share2, Plus, ChevronLeft } from "lucide-react";
+import { useEffect, useRef, useState, Suspense } from "react";
+import { Heart, MessageCircle, Share2, Plus, ChevronLeft, Camera, Loader2, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/MobileShell";
+import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/social")({
@@ -15,6 +16,7 @@ type Post = {
   id: string;
   author_id: string;
   media_url: string;
+  media_type: string | null;
   caption: string | null;
   hashtags: string[] | null;
   created_at: string;
@@ -27,7 +29,7 @@ const feedQuery = {
   queryFn: async (): Promise<Post[]> => {
     const { data, error } = await supabase
       .from("posts")
-      .select("id, author_id, media_url, caption, hashtags, created_at, profiles(username, avatar_url), likes(user_id)")
+      .select("id, author_id, media_url, media_type, caption, hashtags, created_at, profiles(username, avatar_url), likes(user_id)")
       .order("created_at", { ascending: false })
       .limit(20);
     if (error) throw error;
@@ -59,7 +61,7 @@ function Feed() {
       <div className="p-8 text-center">
         <div className="text-6xl mb-3">📸</div>
         <p className="font-display text-brand text-lg">Nenhum post ainda</p>
-        <p className="text-sm text-muted-foreground mt-1">Seja o primeiro a compartilhar uma foto do seu pet!</p>
+        <p className="text-sm text-muted-foreground mt-1">Seja o primeiro a compartilhar uma foto ou vídeo do seu pet!</p>
       </div>
     );
   }
@@ -77,6 +79,7 @@ function PostCard({ post }: { post: Post }) {
 
   const liked = !!userId && post.likes.some((l) => l.user_id === userId);
   const likeCount = post.likes.length;
+  const isVideo = post.media_type === "video";
 
   const toggleLike = useMutation({
     mutationFn: async () => {
@@ -93,7 +96,11 @@ function PostCard({ post }: { post: Post }) {
   return (
     <article className="relative">
       <div className="relative bg-black">
-        <img src={post.media_url} alt={post.caption ?? "Post"} className="w-full aspect-[9/14] object-cover" loading="lazy" />
+        {isVideo ? (
+          <video src={post.media_url} className="w-full aspect-[9/14] object-cover" controls playsInline preload="metadata" />
+        ) : (
+          <img src={post.media_url} alt={post.caption ?? "Post"} className="w-full aspect-[9/14] object-cover" loading="lazy" />
+        )}
         <div className="absolute right-3 bottom-28 flex flex-col items-center gap-4 text-white drop-shadow-md">
           <button onClick={() => toggleLike.mutate()} className="flex flex-col items-center">
             <Heart className={"size-8 " + (liked ? "fill-love text-love" : "text-white")} />
@@ -122,25 +129,51 @@ function PostCard({ post }: { post: Post }) {
 
 function NewPostButton() {
   const qc = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
-  const [url, setUrl] = useState("");
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
+  const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState("");
   const [busy, setBusy] = useState(false);
 
+  async function pickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const isVid = file.type.startsWith("video/");
+    if (file.size > (isVid ? 50 : 8) * 1024 * 1024) {
+      toast.error(isVid ? "Vídeo máx 50MB" : "Imagem máx 8MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await uploadMedia("post-media", file);
+      setMediaUrl(url);
+      setMediaType(isVid ? "video" : "image");
+      toast.success(isVid ? "Vídeo enviado!" : "Foto enviada!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro no upload");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!mediaUrl) { toast.error("Envie uma foto ou vídeo"); return; }
     setBusy(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Faça login");
       const hashtags = tags.split(/[\s,#]+/).map((t) => t.trim()).filter(Boolean);
       const { error } = await supabase.from("posts").insert({
-        author_id: user.id, media_url: url, caption, hashtags, media_type: "image",
+        author_id: user.id, media_url: mediaUrl, caption, hashtags, media_type: mediaType,
       });
       if (error) throw error;
       toast.success("Post publicado!");
-      setOpen(false); setUrl(""); setCaption(""); setTags("");
+      setOpen(false); setMediaUrl(""); setMediaType("image"); setCaption(""); setTags("");
       qc.invalidateQueries({ queryKey: ["feed"] });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro");
@@ -154,12 +187,41 @@ function NewPostButton() {
       </button>
       {open && (
         <div className="fixed inset-0 z-50 bg-black/50 grid place-items-end sm:place-items-center" onClick={() => setOpen(false)}>
-          <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-[480px] bg-card rounded-t-3xl sm:rounded-3xl p-6 space-y-3">
+          <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-[480px] bg-card rounded-t-3xl sm:rounded-3xl p-6 space-y-3 max-h-[90vh] overflow-y-auto">
             <h3 className="font-display text-xl text-brand">Novo post</h3>
-            <input className="nuppy-input pl-4" placeholder="URL da imagem (https://...)" value={url} onChange={(e) => setUrl(e.target.value)} required />
+
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="w-full aspect-[4/5] max-h-[300px] rounded-2xl border-2 border-dashed border-border bg-muted overflow-hidden grid place-items-center relative"
+            >
+              {mediaUrl ? (
+                mediaType === "video" ? (
+                  <video src={mediaUrl} className="w-full h-full object-cover" controls playsInline />
+                ) : (
+                  <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
+                )
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <div className="flex gap-3">
+                    <Camera className="size-7" />
+                    <Video className="size-7" />
+                  </div>
+                  <span className="text-sm font-display">Enviar foto ou vídeo</span>
+                  <span className="text-xs">imagem até 8MB • vídeo até 50MB</span>
+                </div>
+              )}
+              {uploading && (
+                <div className="absolute inset-0 grid place-items-center bg-black/40 text-white">
+                  <Loader2 className="size-6 animate-spin" />
+                </div>
+              )}
+            </button>
+            <input ref={fileRef} type="file" accept="image/*,video/*" className="hidden" onChange={pickFile} />
+
             <textarea className="w-full rounded-2xl border border-border bg-card p-3 text-sm" rows={3} placeholder="Legenda" value={caption} onChange={(e) => setCaption(e.target.value)} />
             <input className="nuppy-input pl-4" placeholder="hashtags (parque, vidapet)" value={tags} onChange={(e) => setTags(e.target.value)} />
-            <button disabled={busy} className="nuppy-btn-primary">{busy ? "Publicando..." : "Publicar"}</button>
+            <button disabled={busy || uploading} className="nuppy-btn-primary">{busy ? "Publicando..." : "Publicar"}</button>
             <button type="button" onClick={() => setOpen(false)} className="nuppy-btn-ghost">Cancelar</button>
           </form>
         </div>

@@ -16,12 +16,21 @@ const meQuery = {
   queryFn: async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("not authenticated");
-    const [{ data: profile }, { data: pets }, { data: posts }] = await Promise.all([
+    const [{ data: profile }, { data: pets }, { data: posts }, { data: liked }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       supabase.from("pets").select("*").eq("owner_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("posts").select("id, media_url").eq("author_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("posts").select("id, media_url, media_type").eq("author_id", user.id).order("created_at", { ascending: false }),
+      supabase
+        .from("likes")
+        .select("post_id, posts!inner(id, media_url, media_type)")
+        .eq("user_id", user.id)
+        .eq("posts.media_type", "video")
+        .order("created_at", { ascending: false }),
     ]);
-    return { user, profile, pets: pets ?? [], posts: posts ?? [] };
+    const likedVideos = ((liked ?? []) as unknown as { posts: { id: string; media_url: string; media_type: string | null } }[])
+      .map((l) => l.posts)
+      .filter(Boolean);
+    return { user, profile, pets: pets ?? [], posts: posts ?? [], likedVideos };
   },
 };
 
@@ -56,7 +65,7 @@ function PerfilPage() {
 
 function PerfilBody() {
   const { data } = useSuspenseQuery(meQuery);
-  const { profile, pets, posts } = data;
+  const { profile, pets, posts, likedVideos } = data;
   const [editing, setEditing] = useState(false);
 
   return (
@@ -117,6 +126,24 @@ function PerfilBody() {
             {posts.map((p) => (
               <div key={p.id} className="aspect-square bg-muted overflow-hidden rounded-md">
                 <img src={p.media_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mt-6 pb-24">
+        <h3 className="font-display text-brand mb-2">❤️ Vídeos curtidos</h3>
+        {likedVideos.length === 0 ? (
+          <div className="rounded-2xl bg-secondary p-5 text-center text-sm text-muted-foreground">
+            Você ainda não curtiu nenhum vídeo
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-1">
+            {likedVideos.map((v) => (
+              <div key={v.id} className="aspect-square bg-black overflow-hidden rounded-md relative">
+                <video src={v.media_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                <div className="absolute bottom-1 right-1 text-white text-xs bg-black/60 rounded px-1">▶</div>
               </div>
             ))}
           </div>

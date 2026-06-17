@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
-import { Suspense, useState } from "react";
-import { ChevronLeft, Plus, Users } from "lucide-react";
+import { Suspense, useEffect, useState } from "react";
+import { ChevronLeft, Plus, Users, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/MobileShell";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -29,7 +29,7 @@ const communitiesQuery = {
     const { data, error } = await supabase
       .from("communities")
       .select("id, name, slug, description, cover_url, emoji, created_by, community_members(user_id)")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: true });
     if (error) throw error;
     return (data as unknown as Community[]) ?? [];
   },
@@ -49,16 +49,9 @@ function ComunidadesPage() {
         </button>
       </header>
 
-      <div className="px-4 mt-4 flex gap-2">
-        <Link to="/servicos" className="flex-1 nuppy-card p-3 text-center">
-          <p className="text-2xl">🛎️</p>
-          <p className="font-display text-sm text-brand mt-1">Serviços Pet</p>
-        </Link>
-        <Link to="/local" className="flex-1 nuppy-card p-3 text-center">
-          <p className="text-2xl">🗺️</p>
-          <p className="font-display text-sm text-brand mt-1">Mapa Pet</p>
-        </Link>
-      </div>
+      <p className="px-4 mt-2 text-sm text-muted-foreground">
+        Bate-papos por tipo de pet. Entre em um grupo e converse com outros tutores.
+      </p>
 
       <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Carregando...</div>}>
         <List />
@@ -73,16 +66,11 @@ function List() {
   const { data } = useSuspenseQuery(communitiesQuery);
   const qc = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
-  if (userId === null) supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? ""));
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null)); }, []);
 
-  async function toggleJoin(c: Community) {
+  async function join(c: Community) {
     if (!userId) return;
-    const joined = c.community_members.some((m) => m.user_id === userId);
-    if (joined) {
-      await supabase.from("community_members").delete().eq("community_id", c.id).eq("user_id", userId);
-    } else {
-      await supabase.from("community_members").insert({ community_id: c.id, user_id: userId });
-    }
+    await supabase.from("community_members").insert({ community_id: c.id, user_id: userId });
     qc.invalidateQueries({ queryKey: ["communities"] });
   }
 
@@ -91,36 +79,41 @@ function List() {
       <div className="p-8 text-center">
         <div className="text-6xl mb-2">👥</div>
         <p className="font-display text-brand">Nenhuma comunidade ainda</p>
-        <p className="text-sm text-muted-foreground mt-1">Crie a primeira da plataforma!</p>
       </div>
     );
   }
   return (
-    <div className="px-4 mt-4 space-y-3">
+    <div className="px-4 mt-4 space-y-2 pb-24">
       {data.map((c) => {
         const joined = !!userId && c.community_members.some((m) => m.user_id === userId);
         return (
-          <div key={c.id} className="nuppy-card overflow-hidden">
-            {c.cover_url ? (
-              <img src={c.cover_url} alt="" className="w-full h-24 object-cover" />
-            ) : (
-              <div className="w-full h-20 bg-gradient-to-br from-primary/30 to-accent grid place-items-center text-4xl">{c.emoji ?? "🐾"}</div>
-            )}
-            <div className="p-3 flex items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-display text-brand">{c.emoji} {c.name}</h3>
-                {c.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{c.description}</p>}
-                <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-                  <Users className="size-3" /> {c.community_members.length} membros
-                </p>
-              </div>
-              <button
-                onClick={() => toggleJoin(c)}
-                className={"px-4 py-1.5 rounded-full text-xs font-display " + (joined ? "bg-accent text-brand" : "bg-primary text-primary-foreground")}
-              >
-                {joined ? "Sair" : "Entrar"}
-              </button>
+          <div key={c.id} className="nuppy-card p-3 flex items-center gap-3">
+            <div className="size-14 rounded-full bg-gradient-to-br from-primary/30 to-accent grid place-items-center text-2xl overflow-hidden shrink-0">
+              {c.cover_url ? <img src={c.cover_url} alt="" className="w-full h-full object-cover" /> : (c.emoji ?? "🐾")}
             </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-display text-brand truncate">{c.emoji} {c.name}</h3>
+              {c.description && <p className="text-xs text-muted-foreground line-clamp-1">{c.description}</p>}
+              <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                <Users className="size-3" /> {c.community_members.length} membros
+              </p>
+            </div>
+            {joined ? (
+              <Link
+                to="/comunidade/$slug"
+                params={{ slug: c.slug }}
+                className="px-3 py-2 rounded-full bg-primary text-primary-foreground text-xs font-display inline-flex items-center gap-1"
+              >
+                <MessageCircle className="size-4" /> Abrir
+              </Link>
+            ) : (
+              <button
+                onClick={() => join(c)}
+                className="px-3 py-2 rounded-full bg-accent text-brand text-xs font-display"
+              >
+                Entrar
+              </button>
+            )}
           </div>
         );
       })}
@@ -140,10 +133,12 @@ function CreateModal({ onClose }: { onClose: () => void }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Faça login");
       const slug = form.name.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + Math.random().toString(36).slice(2, 6);
-      const { error } = await supabase.from("communities").insert({
+      const { data: created, error } = await supabase.from("communities").insert({
         ...form, slug, created_by: user.id, cover_url: form.cover_url || null,
-      });
+      }).select("id").single();
       if (error) throw error;
+      // auto-join creator
+      if (created) await supabase.from("community_members").insert({ community_id: created.id, user_id: user.id });
       toast.success("Comunidade criada!");
       qc.invalidateQueries({ queryKey: ["communities"] });
       onClose();
