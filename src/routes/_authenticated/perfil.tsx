@@ -16,12 +16,21 @@ const meQuery = {
   queryFn: async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("not authenticated");
-    const [{ data: profile }, { data: pets }, { data: posts }] = await Promise.all([
+    const [{ data: profile }, { data: pets }, { data: posts }, { data: liked }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       supabase.from("pets").select("*").eq("owner_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("posts").select("id, media_url").eq("author_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("posts").select("id, media_url, media_type").eq("author_id", user.id).order("created_at", { ascending: false }),
+      supabase
+        .from("likes")
+        .select("post_id, posts!inner(id, media_url, media_type)")
+        .eq("user_id", user.id)
+        .eq("posts.media_type", "video")
+        .order("created_at", { ascending: false }),
     ]);
-    return { user, profile, pets: pets ?? [], posts: posts ?? [] };
+    const likedVideos = ((liked ?? []) as unknown as { posts: { id: string; media_url: string; media_type: string | null } }[])
+      .map((l) => l.posts)
+      .filter(Boolean);
+    return { user, profile, pets: pets ?? [], posts: posts ?? [], likedVideos };
   },
 };
 
@@ -56,7 +65,7 @@ function PerfilPage() {
 
 function PerfilBody() {
   const { data } = useSuspenseQuery(meQuery);
-  const { profile, pets, posts } = data;
+  const { profile, pets, posts, likedVideos } = data;
   const [editing, setEditing] = useState(false);
 
   return (
