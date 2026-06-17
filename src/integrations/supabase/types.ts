@@ -14,7 +14,169 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+        }
+        Relationships: []
+      }
+      likes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pets: {
+        Row: {
+          age: string | null
+          breed: string | null
+          city: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          owner_id: string
+          photo_url: string | null
+          species: string | null
+          updated_at: string
+          weight: string | null
+        }
+        Insert: {
+          age?: string | null
+          breed?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          owner_id: string
+          photo_url?: string | null
+          species?: string | null
+          updated_at?: string
+          weight?: string | null
+        }
+        Update: {
+          age?: string | null
+          breed?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+          photo_url?: string | null
+          species?: string | null
+          updated_at?: string
+          weight?: string | null
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          author_id: string
+          caption: string | null
+          created_at: string
+          hashtags: string[] | null
+          id: string
+          media_type: string
+          media_url: string
+          pet_id: string | null
+        }
+        Insert: {
+          author_id: string
+          caption?: string | null
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          media_type?: string
+          media_url: string
+          pet_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          caption?: string | null
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          media_type?: string
+          media_url?: string
+          pet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
