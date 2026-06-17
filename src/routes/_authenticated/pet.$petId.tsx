@@ -14,14 +14,14 @@ function petQuery(petId: string) {
   return {
     queryKey: ["pet", petId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pets")
-        .select("*, profiles!pets_owner_id_fkey(username, display_name, avatar_url)")
-        .eq("id", petId)
-        .maybeSingle();
+      const { data: pet, error } = await supabase
+        .from("pets").select("*").eq("id", petId).maybeSingle();
       if (error) throw error;
-      if (!data) throw notFound();
-      return data;
+      if (!pet) throw notFound();
+      const { data: profile } = await supabase
+        .from("profiles").select("username, display_name, avatar_url")
+        .eq("id", pet.owner_id).maybeSingle();
+      return { ...pet, profile };
     },
   };
 }
@@ -73,13 +73,13 @@ function PetBody({ petId }: { petId: string }) {
 
           <div className="mt-5 flex items-center gap-3 pt-4 border-t border-border">
             <div className="size-10 rounded-full bg-muted overflow-hidden grid place-items-center">
-              {pet.profiles?.avatar_url ? (
-                <img src={pet.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+              {pet.profile?.avatar_url ? (
+                <img src={pet.profile.avatar_url} alt="" className="w-full h-full object-cover" />
               ) : "👤"}
             </div>
             <div>
               <p className="font-display text-sm text-brand">Tutor</p>
-              <p className="text-sm text-muted-foreground">@{pet.profiles?.username}</p>
+              <p className="text-sm text-muted-foreground">@{pet.profile?.username}</p>
             </div>
           </div>
         </div>
