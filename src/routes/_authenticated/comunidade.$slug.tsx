@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { ChevronLeft, Send, Users } from "lucide-react";
+import { ChevronLeft, Send, Users, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/MobileShell";
 import { toast } from "sonner";
@@ -9,6 +9,16 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/comunidade/$slug")({
   head: ({ params }) => ({ meta: [{ title: `${params.slug} — Nuppy` }] }),
   component: ChatPage,
+  errorComponent: ChatError,
+  notFoundComponent: () => (
+    <MobileShell>
+      <div className="p-8 text-center">
+        <div className="text-6xl mb-2">🐾</div>
+        <p className="font-display text-brand">Comunidade não encontrada</p>
+        <Link to="/comunidades" className="text-primary text-sm mt-2 inline-block">Voltar</Link>
+      </div>
+    </MobileShell>
+  ),
 });
 
 type Message = {
@@ -16,7 +26,7 @@ type Message = {
   body: string;
   user_id: string;
   created_at: string;
-  profiles: { username: string; avatar_url: string | null; display_name: string | null } | null;
+  author?: { username: string; avatar_url: string | null; display_name: string | null } | null;
 };
 
 type CommunityInfo = {
@@ -38,15 +48,31 @@ const chatQuery = (slug: string) => ({
       .maybeSingle();
     if (cErr) throw cErr;
     if (!c) throw new Error("Comunidade não encontrada");
+    const community = c as unknown as CommunityInfo;
 
     const { data: msgs, error: mErr } = await supabase
       .from("community_messages")
-      .select("id, body, user_id, created_at, profiles(username, avatar_url, display_name)")
-      .eq("community_id", (c as CommunityInfo).id)
+      .select("id, body, user_id, created_at")
+      .eq("community_id", community.id)
       .order("created_at", { ascending: true })
       .limit(200);
     if (mErr) throw mErr;
-    return { community: c as unknown as CommunityInfo, messages: (msgs as unknown as Message[]) ?? [] };
+    const rows = (msgs ?? []) as Message[];
+
+    // Fetch profiles for unique authors in a single query (avoids FK ambiguity)
+    const userIds = Array.from(new Set(rows.map((m) => m.user_id)));
+    let profileMap = new Map<string, { username: string; avatar_url: string | null; display_name: string | null }>();
+    if (userIds.length) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url, display_name")
+        .in("id", userIds);
+      (profiles ?? []).forEach((p: { id: string; username: string; avatar_url: string | null; display_name: string | null }) =>
+        profileMap.set(p.id, { username: p.username, avatar_url: p.avatar_url, display_name: p.display_name }),
+      );
+    }
+    const messages = rows.map((m) => ({ ...m, author: profileMap.get(m.user_id) ?? null }));
+    return { community, messages };
   },
 });
 
@@ -57,6 +83,26 @@ function ChatPage() {
       <Suspense fallback={<div className="p-10 text-center text-muted-foreground">Abrindo bate-papo...</div>}>
         <Chat slug={slug} />
       </Suspense>
+    </MobileShell>
+  );
+}
+
+function ChatError({ error, reset }: { error: Error; reset: () => void }) {
+  const router = useRouter();
+  return (
+    <MobileShell>
+      <div className="p-8 text-center space-y-3">
+        <AlertTriangle className="size-10 text-primary mx-auto" />
+        <p className="font-display text-brand">Não foi possível abrir o bate-papo</p>
+        <p className="text-xs text-muted-foreground">{error.message}</p>
+        <div className="flex gap-2 justify-center">
+          <button
+            onClick={() => { router.invalidate(); reset(); }}
+            className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-display"
+          >Tentar novamente</button>
+          <Link to="/comunidades" className="px-4 py-2 rounded-full bg-accent text-brand text-sm font-display">Voltar</Link>
+        </div>
+      </div>
     </MobileShell>
   );
 }
@@ -78,7 +124,6 @@ function Chat({ slug }: { slug: string }) {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
-  // Realtime subscription
   useEffect(() => {
     if (!isMember) return;
     const ch = supabase
@@ -142,7 +187,7 @@ function Chat({ slug }: { slug: string }) {
             <div key={m.id} className={"flex " + (mine ? "justify-end" : "justify-start")}>
               <div className={"max-w-[78%] rounded-2xl px-3 py-2 shadow-soft " + (mine ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-card text-foreground rounded-bl-sm")}>
                 {!mine && (
-                  <p className="text-[11px] font-display text-brand mb-0.5">@{m.profiles?.username ?? "user"}</p>
+                  <p className="text-[11px] font-display text-brand mb-0.5">@{m.author?.username ?? "user"}</p>
                 )}
                 <p className="text-sm whitespace-pre-wrap break-words">{m.body}</p>
                 <p className={"text-[10px] mt-1 " + (mine ? "text-primary-foreground/70" : "text-muted-foreground")}>
@@ -168,7 +213,7 @@ function Chat({ slug }: { slug: string }) {
         </form>
       ) : (
         <div className="p-3 border-t border-border bg-card">
-          <button onClick={join} className="w-full nuppy-btn-primary">Entrar na comunidade para conversar</button>
+          <button onClick={join} className="nuppy-btn-primary">Entrar na comunidade para conversar</button>
           <Link to="/comunidades" className="block text-center text-xs text-muted-foreground mt-2">Voltar</Link>
         </div>
       )}
