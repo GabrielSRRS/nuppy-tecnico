@@ -17,6 +17,7 @@ import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedLocalRouteImport } from './routes/_authenticated/local'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedComunidadesRouteImport } from './routes/_authenticated/comunidades'
 import { Route as AuthenticatedPetNovoRouteImport } from './routes/_authenticated/pet.novo'
 import { Route as AuthenticatedPetPetIdRouteImport } from './routes/_authenticated/pet.$petId'
@@ -61,6 +62,12 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConfiguracoesRoute =
+  AuthenticatedConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedComunidadesRoute =
   AuthenticatedComunidadesRouteImport.update({
     id: '/comunidades',
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/comunidades': typeof AuthenticatedComunidadesRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/home': typeof AuthenticatedHomeRoute
   '/local': typeof AuthenticatedLocalRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -101,6 +109,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/comunidades': typeof AuthenticatedComunidadesRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/home': typeof AuthenticatedHomeRoute
   '/local': typeof AuthenticatedLocalRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -116,6 +125,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/comunidades': typeof AuthenticatedComunidadesRoute
+  '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/local': typeof AuthenticatedLocalRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/comunidades'
+    | '/configuracoes'
     | '/home'
     | '/local'
     | '/perfil'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/comunidades'
+    | '/configuracoes'
     | '/home'
     | '/local'
     | '/perfil'
@@ -158,6 +170,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/comunidades'
+    | '/_authenticated/configuracoes'
     | '/_authenticated/home'
     | '/_authenticated/local'
     | '/_authenticated/perfil'
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/configuracoes': {
+      id: '/_authenticated/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/comunidades': {
       id: '/_authenticated/comunidades'
       path: '/comunidades'
@@ -265,6 +285,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedComunidadesRoute: typeof AuthenticatedComunidadesRoute
+  AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedLocalRoute: typeof AuthenticatedLocalRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
@@ -277,6 +298,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedComunidadesRoute: AuthenticatedComunidadesRoute,
+  AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedLocalRoute: AuthenticatedLocalRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
