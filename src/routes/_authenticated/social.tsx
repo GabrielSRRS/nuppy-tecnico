@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, Suspense } from "react";
 import { Heart, MessageCircle, Share2, Plus, ChevronLeft, Camera, Loader2, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/MobileShell";
+import { CommentsSheet } from "@/components/CommentsSheet";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 
