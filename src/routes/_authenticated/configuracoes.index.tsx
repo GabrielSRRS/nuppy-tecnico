@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/MobileShell";
 
-export const Route = createFileRoute("/_authenticated/configuracoes")({
+export const Route = createFileRoute("/_authenticated/configuracoes/")({
   head: () => ({ meta: [{ title: "Configurações — Nuppy" }] }),
   component: ConfigPage,
 });
