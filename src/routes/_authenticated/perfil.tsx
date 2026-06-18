@@ -36,14 +36,7 @@ const meQuery = {
 
 function PerfilPage() {
   const navigate = useNavigate();
-  const qc = useQueryClient();
-
-  async function signOut() {
-    await qc.cancelQueries();
-    qc.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
-  }
+  void navigate;
 
   return (
     <MobileShell>
@@ -52,9 +45,9 @@ function PerfilPage() {
           <ChevronLeft className="size-5 text-brand" />
         </Link>
         <h1 className="font-display text-xl text-brand">Perfil</h1>
-        <button onClick={signOut} title="Sair" className="size-9 grid place-items-center rounded-full hover:bg-accent">
-          <LogOut className="size-5 text-brand" />
-        </button>
+        <Link to="/configuracoes" title="Configurações" className="size-9 grid place-items-center rounded-full hover:bg-accent">
+          <Settings className="size-5 text-brand" />
+        </Link>
       </header>
       <Suspense fallback={<div className="p-10 text-center text-muted-foreground">Carregando...</div>}>
         <PerfilBody />
