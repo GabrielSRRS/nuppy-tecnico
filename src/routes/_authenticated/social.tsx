@@ -23,6 +23,7 @@ type Post = {
   created_at: string;
   profiles: { username: string; avatar_url: string | null } | null;
   likes: { user_id: string }[];
+  post_comments: { id: string }[];
 };
 
 const feedQuery = {
@@ -30,7 +31,7 @@ const feedQuery = {
   queryFn: async (): Promise<Post[]> => {
     const { data, error } = await supabase
       .from("posts")
-      .select("id, author_id, media_url, media_type, caption, hashtags, created_at, profiles(username, avatar_url), likes(user_id)")
+      .select("id, author_id, media_url, media_type, caption, hashtags, created_at, profiles(username, avatar_url), likes(user_id), post_comments(id)")
       .order("created_at", { ascending: false })
       .limit(20);
     if (error) throw error;
