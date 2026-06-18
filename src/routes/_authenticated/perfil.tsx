@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, Suspense } from "react";
-import { ChevronLeft, Menu, LogOut, Plus, Pencil } from "lucide-react";
+import { ChevronLeft, Menu, Settings, Plus, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/MobileShell";
 import { toast } from "sonner";
