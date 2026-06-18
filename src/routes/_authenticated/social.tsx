@@ -77,10 +77,12 @@ function Feed() {
 function PostCard({ post }: { post: Post }) {
   const qc = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
+  const [showComments, setShowComments] = useState(false);
   useEffect(() => { supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null)); }, []);
 
   const liked = !!userId && post.likes.some((l) => l.user_id === userId);
   const likeCount = post.likes.length;
+  const commentCount = post.post_comments?.length ?? 0;
   const isVideo = post.media_type === "video";
 
   const toggleLike = useMutation({
@@ -95,6 +97,14 @@ function PostCard({ post }: { post: Post }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["feed"] }),
   });
 
+  async function share() {
+    const url = `${window.location.origin}/social`;
+    try {
+      if (navigator.share) await navigator.share({ title: "Nuppy", text: post.caption ?? "Veja no Nuppy", url });
+      else { await navigator.clipboard.writeText(url); toast.success("Link copiado!"); }
+    } catch { /* user cancelled */ }
+  }
+
   return (
     <article className="relative">
       <div className="relative bg-black">
@@ -108,11 +118,11 @@ function PostCard({ post }: { post: Post }) {
             <Heart className={"size-8 " + (liked ? "fill-love text-love" : "text-white")} />
             <span className="text-xs font-display">{likeCount}</span>
           </button>
-          <button className="flex flex-col items-center">
+          <button onClick={() => setShowComments(true)} className="flex flex-col items-center">
             <MessageCircle className="size-8" />
-            <span className="text-xs font-display">0</span>
+            <span className="text-xs font-display">{commentCount}</span>
           </button>
-          <button className="flex flex-col items-center">
+          <button onClick={share} className="flex flex-col items-center">
             <Share2 className="size-8" />
             <span className="text-xs font-display">↗</span>
           </button>
@@ -125,6 +135,7 @@ function PostCard({ post }: { post: Post }) {
           )}
         </div>
       </div>
+      {showComments && <CommentsSheet postId={post.id} onClose={() => setShowComments(false)} />}
     </article>
   );
 }
