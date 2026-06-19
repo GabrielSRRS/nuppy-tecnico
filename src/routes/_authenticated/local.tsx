@@ -1,14 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, Suspense } from "react";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Plus, MapPin, Phone, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, Suspense } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { ChevronLeft, MapPin, Phone, X, List, Map as MapIcon, Locate, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/MobileShell";
-import { ImageUpload } from "@/components/ImageUpload";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/local")({
-  head: () => ({ meta: [{ title: "Locais Pet Friendly — Nuppy" }] }),
+  head: () => ({ meta: [{ title: "Mapa Pet Friendly — Nuppy" }] }),
   component: LocalPage,
 });
 
@@ -30,17 +28,16 @@ const placesQuery = {
   queryFn: async (): Promise<Place[]> => {
     const { data, error } = await supabase
       .from("places")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("id,name,category,description,address,city,lat,lng,phone,photo_url")
+      .order("name");
     if (error) throw error;
     return data ?? [];
   },
 };
 
-const CATEGORIES = ["Veterinário", "Pet Shop", "Parque", "Hotel Pet", "Café Pet", "Adestrador"];
 const CAT_EMOJI: Record<string, string> = {
-  "Veterinário": "🩺", "Pet Shop": "🛍️", "Parque": "🌳",
-  "Hotel Pet": "🏨", "Café Pet": "☕", "Adestrador": "🦮",
+  "ONG": "🐾", "Banho": "🛁", "Hotel": "🏨", "Alimentação": "🍖",
+  "Veterinário": "🩺", "Pet Shop": "🛍️", "Parque": "🌳", "Café Pet": "☕", "Adestrador": "🦮",
 };
 
 declare global {
@@ -57,8 +54,10 @@ function LocalPage() {
         <Link to="/home" className="size-9 grid place-items-center rounded-full hover:bg-accent">
           <ChevronLeft className="size-5 text-brand" />
         </Link>
-        <h1 className="font-display text-xl text-brand">Locais Pet Friendly</h1>
-        <div className="size-9" />
+        <h1 className="font-display text-xl text-brand">Mapa Pet Friendly</h1>
+        <Link to="/estabelecimentos" className="size-9 grid place-items-center rounded-full bg-accent text-brand" title="Lista">
+          <List className="size-5" />
+        </Link>
       </header>
       <Suspense fallback={<div className="p-10 text-center text-muted-foreground">Carregando mapa...</div>}>
         <MapBody />
@@ -72,11 +71,23 @@ function MapBody() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const infoRef = useRef<any>(null);
   const [ready, setReady] = useState(false);
   const [selected, setSelected] = useState<Place | null>(null);
-  const [adding, setAdding] = useState<{ lat: number; lng: number } | null>(null);
+  const [activeCat, setActiveCat] = useState<string>("Todos");
+  const [search, setSearch] = useState("");
 
-  // Load Google Maps script once
+  const categories = useMemo(() => ["Todos", ...Array.from(new Set(places.map((p) => p.category)))], [places]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return places.filter((p) => {
+      if (activeCat !== "Todos" && p.category !== activeCat) return false;
+      if (q && !(`${p.name} ${p.address ?? ""} ${p.city ?? ""}`.toLowerCase().includes(q))) return false;
+      return true;
+    });
+  }, [places, activeCat, search]);
+
   useEffect(() => {
     if (window.google?.maps) { setReady(true); return; }
     const key = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
@@ -88,83 +99,126 @@ function MapBody() {
     document.head.appendChild(s);
   }, []);
 
-  // Init map
   useEffect(() => {
     if (!ready || !mapRef.current || mapInstance.current) return;
-    const center = { lat: -23.5505, lng: -46.6333 }; // São Paulo default
+    const center = { lat: -23.5505, lng: -46.6333 };
     mapInstance.current = new window.google.maps.Map(mapRef.current, {
-      center, zoom: 12, disableDefaultUI: true, zoomControl: true,
+      center, zoom: 12, disableDefaultUI: true, zoomControl: true, clickableIcons: false,
+      styles: [{ featureType: "poi.business", stylers: [{ visibility: "off" }] }],
     });
-
-    // Try geolocation
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => mapInstance.current?.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {},
-        { timeout: 5000 },
-      );
-    }
-
-    // Long press / right click to add a place
-    mapInstance.current.addListener("click", (e: any) => {
-      if (!e.latLng) return;
-      setAdding({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-    });
+    infoRef.current = new window.google.maps.InfoWindow();
+    locateMe();
   }, [ready]);
 
-  // Render markers
+  function locateMe() {
+    if (!navigator.geolocation || !mapInstance.current) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const c = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        mapInstance.current?.setCenter(c);
+        mapInstance.current?.setZoom(13);
+        new window.google.maps.Marker({
+          position: c, map: mapInstance.current,
+          icon: { path: window.google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#3b82f6", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 2 },
+          title: "Você está aqui",
+        });
+      },
+      () => {}, { timeout: 5000 },
+    );
+  }
+
+  // Render filtered markers
   useEffect(() => {
     if (!ready || !mapInstance.current) return;
     markersRef.current.forEach((m) => m.setMap(null));
-    markersRef.current = places.map((p) => {
+    markersRef.current = filtered.map((p) => {
       const marker = new window.google.maps.Marker({
         position: { lat: p.lat, lng: p.lng },
         map: mapInstance.current!,
         title: p.name,
         label: { text: CAT_EMOJI[p.category] ?? "🐾", fontSize: "20px" },
       });
-      marker.addListener("click", () => setSelected(p));
+      marker.addListener("click", () => {
+        setSelected(p);
+        infoRef.current?.setContent(
+          `<div style="font-family:system-ui;padding:2px 4px;max-width:200px">
+            <div style="font-weight:700;color:#7c2d12">${escape(p.name)}</div>
+            <div style="font-size:11px;color:#92400e">${escape(p.category)}</div>
+            ${p.address ? `<div style="font-size:11px;color:#666;margin-top:2px">${escape(p.address)}</div>` : ""}
+          </div>`,
+        );
+        infoRef.current?.open({ anchor: marker, map: mapInstance.current });
+      });
       return marker;
     });
-  }, [ready, places]);
+  }, [ready, filtered]);
 
   return (
     <div className="relative">
-      <div ref={mapRef} className="w-full h-[calc(100vh-180px)] bg-muted" />
+      <div className="px-4 mt-3">
+        <label className="relative block">
+          <Search className="size-4 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar local pet friendly..."
+            className="w-full rounded-full bg-card border border-border pl-11 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </label>
+        <div className="flex gap-2 overflow-x-auto py-2 -mx-1 px-1 scrollbar-none">
+          {categories.map((c) => {
+            const active = c === activeCat;
+            return (
+              <button
+                key={c}
+                onClick={() => setActiveCat(c)}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-display border transition ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card text-brand border-border hover:bg-accent"
+                }`}
+              >
+                {c === "Todos" ? "Todos" : `${CAT_EMOJI[c] ?? "📍"} ${c}`}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div ref={mapRef} className="w-full h-[calc(100vh-260px)] bg-muted" />
       {!ready && (
-        <div className="absolute inset-0 grid place-items-center text-muted-foreground">
+        <div className="absolute inset-0 grid place-items-center text-muted-foreground pointer-events-none">
           <div className="font-display animate-pulse">Carregando Google Maps...</div>
         </div>
       )}
 
-      <div className="absolute top-2 left-2 right-2 flex gap-2 overflow-x-auto pb-1">
-        {CATEGORIES.map((c) => (
-          <span key={c} className="shrink-0 rounded-full bg-card/95 border border-border px-3 py-1 text-xs font-display text-brand">
-            {CAT_EMOJI[c]} {c}
-          </span>
-        ))}
-      </div>
-
       <button
-        onClick={() => {
-          const c = mapInstance.current?.getCenter();
-          if (c) setAdding({ lat: c.lat(), lng: c.lng() });
-        }}
-        className="absolute bottom-4 right-4 size-14 rounded-full bg-primary text-primary-foreground shadow-lg grid place-items-center"
-        title="Adicionar local"
+        onClick={locateMe}
+        className="absolute bottom-4 right-4 size-12 rounded-full bg-card shadow-lg grid place-items-center border border-border"
+        title="Minha localização"
       >
-        <Plus className="size-6" />
+        <Locate className="size-5 text-primary" />
       </button>
 
-      {selected && <PlaceDetail place={selected} onClose={() => setSelected(null)} />}
-      {adding && <AddPlaceModal coords={adding} onClose={() => setAdding(null)} />}
+      <Link
+        to="/estabelecimentos"
+        className="absolute bottom-4 left-4 rounded-full bg-primary text-primary-foreground shadow-lg px-4 py-3 inline-flex items-center gap-2 font-display text-sm"
+      >
+        <List className="size-4" /> Ver lista
+      </Link>
+
+      {selected && <PlaceDetail place={selected} onClose={() => { setSelected(null); infoRef.current?.close(); }} />}
     </div>
   );
 }
 
+function escape(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+}
+
 function PlaceDetail({ place, onClose }: { place: Place; onClose: () => void }) {
   return (
-    <div className="absolute inset-x-2 bottom-4 z-10 nuppy-card p-4">
+    <div className="absolute inset-x-3 bottom-20 z-10 nuppy-card p-4 shadow-2xl">
       <button onClick={onClose} className="absolute top-2 right-2 size-8 grid place-items-center rounded-full hover:bg-accent">
         <X className="size-4" />
       </button>
@@ -172,66 +226,23 @@ function PlaceDetail({ place, onClose }: { place: Place; onClose: () => void }) 
         {place.photo_url ? (
           <img src={place.photo_url} alt={place.name} className="size-20 rounded-xl object-cover" />
         ) : (
-          <div className="size-20 rounded-xl bg-muted grid place-items-center text-3xl">{CAT_EMOJI[place.category] ?? "🐾"}</div>
+          <div className="size-20 rounded-xl bg-accent grid place-items-center text-3xl">{CAT_EMOJI[place.category] ?? "🐾"}</div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-primary font-display">{place.category}</p>
+          <p className="text-[11px] text-primary font-display uppercase tracking-wide">{place.category}</p>
           <h3 className="font-display text-brand">{place.name}</h3>
           {place.address && <p className="text-xs text-muted-foreground truncate flex items-center gap-1"><MapPin className="size-3" /> {place.address}</p>}
           {place.phone && <a href={`tel:${place.phone}`} className="text-xs text-primary flex items-center gap-1 mt-1"><Phone className="size-3" /> {place.phone}</a>}
         </div>
       </div>
-      {place.description && <p className="text-sm text-foreground/80 mt-2">{place.description}</p>}
-    </div>
-  );
-}
-
-function AddPlaceModal({ coords, onClose }: { coords: { lat: number; lng: number }; onClose: () => void }) {
-  const qc = useQueryClient();
-  const [form, setForm] = useState({
-    name: "", category: "Veterinário", description: "", address: "", city: "", phone: "", photo_url: "",
-  });
-  const [busy, setBusy] = useState(false);
-  const upd = <K extends keyof typeof form>(k: K) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
-
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Faça login");
-      const { error } = await supabase.from("places").insert({
-        ...form, lat: coords.lat, lng: coords.lng, created_by: user.id, photo_url: form.photo_url || null,
-      });
-      if (error) throw error;
-      toast.success("Local adicionado!");
-      qc.invalidateQueries({ queryKey: ["places"] });
-      onClose();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro");
-    } finally { setBusy(false); }
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 grid place-items-end sm:place-items-center" onClick={onClose}>
-      <form onClick={(e) => e.stopPropagation()} onSubmit={save} className="w-full max-w-[480px] bg-card rounded-t-3xl sm:rounded-3xl p-6 space-y-3 max-h-[90vh] overflow-y-auto">
-        <h3 className="font-display text-xl text-brand">Novo local pet friendly</h3>
-        <p className="text-xs text-muted-foreground">📍 {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}</p>
-        <div className="flex justify-center"><ImageUpload bucket="place-photos" value={form.photo_url} onChange={(url) => setForm((f) => ({ ...f, photo_url: url }))} /></div>
-        <input className="nuppy-input pl-4" placeholder="Nome do local" required value={form.name} onChange={upd("name")} />
-        <select className="nuppy-input pl-4" value={form.category} onChange={upd("category")}>
-          {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-        </select>
-        <input className="nuppy-input pl-4" placeholder="Endereço" value={form.address} onChange={upd("address")} />
-        <div className="grid grid-cols-2 gap-3">
-          <input className="nuppy-input pl-4" placeholder="Cidade" value={form.city} onChange={upd("city")} />
-          <input className="nuppy-input pl-4" placeholder="Telefone" value={form.phone} onChange={upd("phone")} />
-        </div>
-        <textarea className="w-full rounded-2xl border border-border bg-card p-3 text-sm" rows={2} placeholder="Descrição" value={form.description} onChange={upd("description")} />
-        <button disabled={busy} className="nuppy-btn-primary">{busy ? "Salvando..." : "Adicionar local"}</button>
-        <button type="button" onClick={onClose} className="nuppy-btn-ghost">Cancelar</button>
-      </form>
+      {place.description && <p className="text-sm text-foreground/80 mt-2 line-clamp-3">{place.description}</p>}
+      <a
+        href={`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`}
+        target="_blank" rel="noreferrer"
+        className="mt-3 block text-center rounded-full bg-primary text-primary-foreground py-2 text-sm font-display"
+      >
+        <MapIcon className="size-4 inline -mt-0.5 mr-1" /> Como chegar
+      </a>
     </div>
   );
 }
