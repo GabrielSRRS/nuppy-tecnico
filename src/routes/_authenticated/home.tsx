@@ -45,13 +45,21 @@ function HomePage() {
         <h2 className="font-display text-lg text-brand mb-2">Destaque</h2>
         <div className="grid grid-cols-3 gap-3">
           {categories.map((c) => (
-            <button key={c.label} className={`rounded-2xl bg-gradient-to-br ${c.bg} aspect-square flex flex-col items-end p-2 shadow-card hover:scale-[1.02] transition`}>
+            <Link key={c.label} to="/estabelecimentos" className={`rounded-2xl bg-gradient-to-br ${c.bg} aspect-square flex flex-col items-end p-2 shadow-card hover:scale-[1.02] transition`}>
               <span className="text-3xl ml-auto">{c.emoji}</span>
               <span className="mt-auto font-display text-sm text-brand">{c.label}</span>
-            </button>
+            </Link>
           ))}
         </div>
+        <Link to="/estabelecimentos" className="mt-3 nuppy-card p-4 flex items-center justify-between hover:shadow-soft transition">
+          <div>
+            <p className="font-display text-brand">Estabelecimentos pet</p>
+            <p className="text-xs text-muted-foreground">ONGs, banho, hotéis, alimentação e mais</p>
+          </div>
+          <span className="text-2xl">🏪</span>
+        </Link>
       </section>
+
 
       <section className="px-4 mt-6">
         <div className="nuppy-card p-4">
