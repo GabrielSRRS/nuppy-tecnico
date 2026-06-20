@@ -98,15 +98,22 @@ function PostCard({ post }: { post: Post }) {
   });
 
   async function share() {
-    const url = `${window.location.origin}/social`;
+    const url = `${window.location.origin}/social#post-${post.id}`;
+    const text = post.caption
+      ? `${post.caption}\n— @${post.profiles?.username ?? "nuppy"} no Nuppy`
+      : `Veja este ${isVideo ? "vídeo" : "post"} de @${post.profiles?.username ?? "nuppy"} no Nuppy 🐾`;
     try {
-      if (navigator.share) await navigator.share({ title: "Nuppy", text: post.caption ?? "Veja no Nuppy", url });
-      else { await navigator.clipboard.writeText(url); toast.success("Link copiado!"); }
+      if (navigator.share) {
+        await navigator.share({ title: "Nuppy", text, url });
+      } else {
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        toast.success("Link copiado!");
+      }
     } catch { /* user cancelled */ }
   }
 
   return (
-    <article className="relative">
+    <article id={`post-${post.id}`} className="relative">
       <div className="relative bg-black">
         {isVideo ? (
           <video src={post.media_url} className="w-full aspect-[9/14] object-cover" controls playsInline preload="metadata" />

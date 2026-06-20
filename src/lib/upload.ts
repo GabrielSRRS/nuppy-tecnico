@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type Bucket = "pet-photos" | "post-media" | "place-photos" | "service-photos";
+export type Bucket = "pet-photos" | "post-media" | "place-photos" | "service-photos" | "community-media";
 
 /**
  * Uploads a file (image or video) to a private bucket under a user-scoped folder
