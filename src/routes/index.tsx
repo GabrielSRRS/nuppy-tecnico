@@ -1,3 +1,9 @@
+/* ============================================================================
+ *  PÁGINA: /  —  LANDING / REDIRECT
+ * ----------------------------------------------------------------------------
+ *  Página raiz pública. Se o usuário está logado, manda para /home; se
+ *  não está, mostra a apresentação do app com botão de entrar.
+ * ========================================================================== */
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";

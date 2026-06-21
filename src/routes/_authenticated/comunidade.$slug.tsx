@@ -1,3 +1,13 @@
+/* ============================================================================
+ *  PÁGINA: /comunidade/$slug  —  CHAT DE UMA COMUNIDADE
+ * ----------------------------------------------------------------------------
+ *  Sala de bate-papo em tempo real (estilo WhatsApp).
+ *    • mensagens da tabela `community_messages` (join em `profiles`)
+ *    • Realtime do Supabase escuta INSERTs e atualiza a lista
+ *    • suporte a envio de texto, foto e vídeo (bucket community-media)
+ *
+ *  O parâmetro `$slug` da URL identifica qual comunidade abrir.
+ * ========================================================================== */
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense, useEffect, useRef, useState } from "react";

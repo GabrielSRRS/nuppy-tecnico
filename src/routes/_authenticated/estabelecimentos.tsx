@@ -1,3 +1,9 @@
+/* ============================================================================
+ *  PÁGINA: /estabelecimentos  —  LISTA DE ESTABELECIMENTOS
+ * ----------------------------------------------------------------------------
+ *  Versão "lista com busca" da tabela `places`. Tem busca textual e chips
+ *  por categoria. Cada item leva para /estabelecimento/$id.
+ * ========================================================================== */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";

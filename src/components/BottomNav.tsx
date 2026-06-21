@@ -1,3 +1,10 @@
+/* ============================================================================
+ *  COMPONENTE: BottomNav  —  BARRA DE NAVEGAÇÃO INFERIOR
+ * ----------------------------------------------------------------------------
+ *  A barrinha fixa no rodapé com os ícones de navegação principal
+ *  (Home, Social, Comunidades, Local, Perfil). Aparece em todas as
+ *  páginas autenticadas via MobileShell.
+ * ========================================================================== */
 import { Link, useRouterState } from "@tanstack/react-router";
 import { PawPrint, Heart, MapPin, Users, User } from "lucide-react";
 

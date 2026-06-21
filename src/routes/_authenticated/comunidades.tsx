@@ -1,3 +1,12 @@
+/* ============================================================================
+ *  PÁGINA: /comunidades  —  LISTA DE GRUPOS DE BATE-PAPO
+ * ----------------------------------------------------------------------------
+ *  Mostra as comunidades disponíveis (cachorros, gatos, peixes, etc.) —
+ *  tabela `communities`. Cada card leva para /comunidade/$slug que é o
+ *  chat em tempo real.
+ *
+ *  Membro entra/sai via tabela `community_members`.
+ * ========================================================================== */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense, useEffect, useState } from "react";

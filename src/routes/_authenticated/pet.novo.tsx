@@ -1,3 +1,12 @@
+/* ============================================================================
+ *  PÁGINA: /pet/novo  —  CADASTRO DE UM NOVO PET
+ * ----------------------------------------------------------------------------
+ *  Formulário multi-seção com TODOS os dados do pet:
+ *    • nome, espécie, raça, gênero, cor, porte, nascimento
+ *    • status médico (vacinado, castrado), notas médicas, vet
+ *    • personalidade, foto (bucket pet-photos)
+ *  Salva na tabela `pets` vinculando ao `owner_id` do usuário logado.
+ * ========================================================================== */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronLeft } from "lucide-react";

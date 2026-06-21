@@ -1,3 +1,10 @@
+/* ============================================================================
+ *  PÁGINA: /estabelecimento/$id  —  DETALHE DE UM ESTABELECIMENTO
+ * ----------------------------------------------------------------------------
+ *  Página de "cartão" do lugar: foto, descrição, endereço, telefone,
+ *  botão "Como chegar" (Google Maps) e "Compartilhar".
+ *  Dados vêm de `places` filtrando pelo ID da URL.
+ * ========================================================================== */
 import { createFileRoute, Link, useParams, useRouter } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";

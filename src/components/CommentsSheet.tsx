@@ -1,3 +1,10 @@
+/* ============================================================================
+ *  COMPONENTE: CommentsSheet  —  MODAL DE COMENTÁRIOS
+ * ----------------------------------------------------------------------------
+ *  Bottom sheet (modal que sobe do rodapé) que mostra e permite postar
+ *  comentários de um post. Usa a tabela `post_comments` e enriquece com
+ *  dados do autor (`profiles`). É reaproveitado pela página /social.
+ * ========================================================================== */
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Send, X, Trash2 } from "lucide-react";
