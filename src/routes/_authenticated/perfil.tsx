@@ -1,3 +1,13 @@
+/* ============================================================================
+ *  PÁGINA: /perfil  —  PERFIL DO TUTOR
+ * ----------------------------------------------------------------------------
+ *  Mostra os dados do usuário logado:
+ *    • avatar, nome, bio (tabela `profiles`)
+ *    • pets cadastrados   (tabela `pets`)
+ *    • posts publicados   (tabela `posts`)
+ *    • vídeos curtidos    (tabela `likes` + `posts`)
+ *  Header tem um ícone de engrenagem que leva para /configuracoes.
+ * ========================================================================== */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, Suspense } from "react";

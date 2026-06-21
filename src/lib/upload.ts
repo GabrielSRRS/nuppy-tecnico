@@ -1,3 +1,14 @@
+/* ============================================================================
+ *  LIB: upload.ts  —  HELPER DE UPLOAD PARA O STORAGE
+ * ----------------------------------------------------------------------------
+ *  Função única `uploadImage(bucket, file)` que:
+ *    1. Garante que o usuário está logado
+ *    2. Sobe o arquivo num caminho `userId/timestamp-random.ext`
+ *    3. Gera uma signed URL de 10 anos para guardar no banco
+ *
+ *  Buckets suportados (todos PRIVADOS):
+ *    - pet-photos, post-media, place-photos, service-photos, community-media
+ * ========================================================================== */
 import { supabase } from "@/integrations/supabase/client";
 
 export type Bucket = "pet-photos" | "post-media" | "place-photos" | "service-photos" | "community-media";

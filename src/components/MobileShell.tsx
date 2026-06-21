@@ -1,3 +1,10 @@
+/* ============================================================================
+ *  COMPONENTE: MobileShell  —  ESQUELETO MOBILE
+ * ----------------------------------------------------------------------------
+ *  Envelope de layout usado por todas as telas autenticadas. Garante
+ *  largura máxima de celular, padding inferior pra não cobrir conteúdo
+ *  com a BottomNav, e o fundo padrão do app.
+ * ========================================================================== */
 import type { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
 

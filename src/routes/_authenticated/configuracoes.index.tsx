@@ -1,3 +1,11 @@
+/* ============================================================================
+ *  PÁGINA: /configuracoes  —  MENU DE CONFIGURAÇÕES
+ * ----------------------------------------------------------------------------
+ *  Tela hub das configurações:
+ *    • alternar tema (claro/escuro) salvo em localStorage
+ *    • atalhos para Privacidade, Termos, Política e Contato
+ *    • botão de Sair (logout do Supabase)
+ * ========================================================================== */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Moon, Shield, Headphones, AlertCircle, Lock, LogOut } from "lucide-react";

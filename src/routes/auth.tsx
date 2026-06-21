@@ -1,3 +1,12 @@
+/* ============================================================================
+ *  PÁGINA: /auth  —  LOGIN / CADASTRO
+ * ----------------------------------------------------------------------------
+ *  Única tela PÚBLICA (não está dentro de _authenticated). Aqui o usuário:
+ *    • entra com e-mail/senha (Supabase Auth)
+ *    • cria conta nova
+ *    • entra com Google (via lovable.auth.signInWithOAuth)
+ *  Depois do login, é redirecionado para /home automaticamente.
+ * ========================================================================== */
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Mail, Lock, User as UserIcon, Eye, EyeOff } from "lucide-react";

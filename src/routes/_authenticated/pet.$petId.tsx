@@ -1,3 +1,10 @@
+/* ============================================================================
+ *  PÁGINA: /pet/$petId  —  DETALHE/EDIÇÃO DE UM PET
+ * ----------------------------------------------------------------------------
+ *  Mostra o perfil completo do pet (capa, badges de saúde, personalidade,
+ *  notas médicas) e permite editar / excluir. Lê da tabela `pets` filtrando
+ *  pelo ID na URL ($petId).
+ * ========================================================================== */
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";

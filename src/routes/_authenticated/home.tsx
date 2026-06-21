@@ -1,3 +1,14 @@
+/* ============================================================================
+ *  PÁGINA: /home  —  TELA INICIAL DO APP
+ * ----------------------------------------------------------------------------
+ *  Hub do usuário logado. Mostra:
+ *    • saudação personalizada (com o nome do tutor)
+ *    • atalhos rápidos para as áreas do app (Feed, Pets, Local, etc.)
+ *    • lista resumida dos pets do usuário
+ *
+ *  É o "Spring Board" — o ponto de partida pra navegar no Nuppy.
+ *  Dados vêm das tabelas `profiles` e `pets`.
+ * ========================================================================== */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Search, Mic, Heart, MapPin } from "lucide-react";

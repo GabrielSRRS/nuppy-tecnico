@@ -1,3 +1,10 @@
+/* ============================================================================
+ *  COMPONENTE: ImageUpload  —  CAIXA DE UPLOAD DE IMAGEM
+ * ----------------------------------------------------------------------------
+ *  Componente visual reutilizável: caixa pontilhada que abre o seletor de
+ *  arquivos, faz upload via `uploadImage` (lib/upload.ts) e devolve a URL
+ *  pública para o componente pai salvar no banco.
+ * ========================================================================== */
 import { useRef, useState } from "react";
 import { Camera, Loader2 } from "lucide-react";
 import { uploadImage, type Bucket } from "@/lib/upload";

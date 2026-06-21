@@ -1,3 +1,9 @@
+/* ============================================================================
+ *  PÁGINA: /servicos  —  DIVULGAÇÃO DE SERVIÇOS PET
+ * ----------------------------------------------------------------------------
+ *  Espaço onde tutores/prestadores podem divulgar serviços (passeio,
+ *  banho, adestramento, pet sitter). Lê e grava na tabela `services`.
+ * ========================================================================== */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense, useState } from "react";

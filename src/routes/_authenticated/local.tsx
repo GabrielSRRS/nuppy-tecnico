@@ -1,3 +1,17 @@
+/* ============================================================================
+ *  PÁGINA: /local  —  MAPA DE ESTABELECIMENTOS PET FRIENDLY
+ * ----------------------------------------------------------------------------
+ *  Integra com Google Maps. Lê estabelecimentos da tabela `places`.
+ *  Funcionalidades:
+ *    • geolocalização do usuário (ponto azul)
+ *    • marcadores customizados por categoria
+ *    • alternar Mapa <-> Lista (com distância calculada via Haversine)
+ *    • filtros por categoria e busca por nome
+ *    • clique no marcador abre InfoWindow com "Como chegar"
+ *
+ *  ⚠️ Para adicionar novos lugares: só admins (via banco). Veja a migration
+ *  que cria a função `has_role` e a policy de INSERT.
+ * ========================================================================== */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
