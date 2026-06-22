@@ -40,9 +40,12 @@
   --color-brand: var(--brand);
   --color-brand-soft: var(--brand-soft);
   --color-love: var(--love);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
 
-  --shadow-soft: 0 8px 24px -10px color-mix(in oklab, var(--primary) 35%, transparent);
-  --shadow-card: 0 4px 14px -6px color-mix(in oklab, var(--brand) 25%, transparent);
+  --shadow-soft: 0 10px 30px -12px color-mix(in oklab, var(--primary) 45%, transparent);
+  --shadow-card: 0 6px 20px -10px color-mix(in oklab, var(--brand) 28%, transparent);
+  --shadow-float: 0 20px 50px -20px color-mix(in oklab, var(--brand) 40%, transparent);
 }
 
 /* ============================================================================
@@ -56,50 +59,68 @@
  *    • chroma       → 0 = cinza, valores maiores = cor mais "viva"
  *    • matiz        → ângulo (0 = vermelho, 60 = amarelo/laranja, 240 = azul)
  * ========================================================================== */
+/* ============================================================================
+ *  🎨 PALETA NUPPY OFICIAL — Warm Pastel · Pet-Friendly · Soft Beige
+ * ----------------------------------------------------------------------------
+ *  HEX de referência (mexa AQUI pra mudar a identidade em TODAS as telas):
+ *    #F2EFEA  Creme claro          → background
+ *    #FFFDF9  Branco quente        → cards
+ *    #ECD2A9  Bege pastel          → accent
+ *    #D1B497  Bege rosado
+ *    #DBA262  Caramelo claro       → brand-soft
+ *    #B3A69B  Cinza quente
+ *    #9A572C  Marrom principal     → brand (títulos)
+ *    #5B351F  Marrom escuro        → foreground (texto)
+ *    #E49935  Laranja destaque     → primary (botões)
+ *    #4FA3D9  Azul coleira         → info
+ *    #A9D6F2  Azul claro
+ * ========================================================================== */
 :root {
-  --radius: 1rem;                                   /* cantos arredondados padrão dos cards/botões */
+  --radius: 1.25rem;                                /* cantos generosos = sensação premium */
 
-  /* 🟫 Fundo geral do app (creme bem clarinho) */
-  --background: oklch(0.975 0.018 80);              /* #FBF6EC — cor das paredes do app */
-  --foreground: oklch(0.32 0.08 45);                /* cor padrão de TEXTO (marrom-chocolate) */
+  --background: #F2EFEA;                            /* creme claro */
+  --foreground: #5B351F;                            /* marrom escuro — texto principal */
 
-  /* ⬜ Cards (caixinhas brancas que envolvem conteúdo) */
-  --card: oklch(1 0 0);                             /* branco puro do card */
-  --card-foreground: oklch(0.32 0.08 45);           /* texto dentro do card */
+  --card: #FFFDF9;                                  /* branco quente */
+  --card-foreground: #5B351F;
 
-  --popover: oklch(1 0 0);                          /* fundo de menus suspensos */
-  --popover-foreground: oklch(0.32 0.08 45);
+  --popover: #FFFDF9;
+  --popover-foreground: #5B351F;
 
-  /* 🟧 COR PRIMÁRIA — é a cor dos BOTÕES principais (laranja Nuppy)
-     ⚠️ Trocar isto muda a cor de quase TODOS os botões do app! */
-  --primary: oklch(0.76 0.16 60);                   /* #F2A847 — laranja quentinho */
-  --primary-foreground: oklch(1 0 0);               /* cor do texto DENTRO do botão laranja (branco) */
+  /* 🟧 CTA principal — laranja destaque */
+  --primary: #E49935;
+  --primary-foreground: #FFFDF9;
 
-  /* 🟨 Cor secundária (pêssego clarinho) — fundos suaves */
-  --secondary: oklch(0.94 0.04 75);
-  --secondary-foreground: oklch(0.38 0.10 45);
+  /* 🟨 Secundária — bege pastel */
+  --secondary: #ECD2A9;
+  --secondary-foreground: #5B351F;
 
-  /* ⬜ Tons cinza/neutros (textos desabilitados, divisores, etc.) */
-  --muted: oklch(0.94 0.02 80);
-  --muted-foreground: oklch(0.52 0.04 50);          /* cor dos textos secundários (cinza) */
+  --muted: #ECE4D7;
+  --muted-foreground: #8A7A6D;                      /* cinza quente legível */
 
-  --accent: oklch(0.88 0.07 70);                    /* damasco suave — destaques */
-  --accent-foreground: oklch(0.32 0.08 45);
+  --accent: #ECD2A9;
+  --accent-foreground: #5B351F;
 
-  /* 🟥 Cor de PERIGO — botões de excluir, alertas de erro */
-  --destructive: oklch(0.62 0.22 25);               /* vermelho */
-  --destructive-foreground: oklch(1 0 0);
+  --destructive: #C0432D;
+  --destructive-foreground: #FFFDF9;
 
-  --border: oklch(0.88 0.03 70);                    /* cor das BORDAS/contornos */
-  --input: oklch(0.92 0.025 75);                    /* fundo dos campos de input */
-  --ring: oklch(0.76 0.16 60);                      /* anel quando um input está focado (laranja) */
+  --border: #E3D6C2;
+  --input: #F6EFE2;
+  --ring: #E49935;
 
-  /* 🐾 CORES EXCLUSIVAS DO NUPPY (usadas como `text-brand`, `bg-love`, etc.) */
-  --cream: oklch(0.97 0.025 80);                    /* creme bem claro (fundo decorativo) */
-  --paw: oklch(0.88 0.05 70);                       /* cor das "patinhas" no fundo */
-  --brand: oklch(0.42 0.12 45);                     /* MARROM-CHOCOLATE do logo Nuppy */
-  --brand-soft: oklch(0.55 0.13 45);                /* versão mais clara do marrom */
-  --love: oklch(0.65 0.22 20);                      /* CORAL do coração (curtir) */
+  /* 🐾 Tokens exclusivos Nuppy */
+  --cream: #F2EFEA;
+  --paw: #ECD2A9;
+  --brand: #9A572C;                                 /* marrom principal */
+  --brand-soft: #DBA262;                            /* caramelo */
+  --love: #E07A5F;                                  /* coral do coração */
+  --info: #4FA3D9;                                  /* azul coleira */
+  --info-soft: #A9D6F2;
+
+  /* Gradientes reutilizáveis (use via background-image) */
+  --gradient-warm:    linear-gradient(135deg, #FFFDF9 0%, #F2EFEA 60%, #ECD2A9 100%);
+  --gradient-primary: linear-gradient(135deg, #E49935 0%, #DBA262 100%);
+  --gradient-brand:   linear-gradient(135deg, #9A572C 0%, #5B351F 100%);
 }
 
 /* ============================================================================
@@ -158,35 +179,53 @@
     background-size: 100% 100%;
   }
 
-  /* 🟦 Card branco padrão (caixinha com sombra) */
+  /* 🟦 Card padrão — branco quente, borda sutil e sombra macia */
   .nuppy-card {
     background: var(--card);
-    border-radius: 1.25rem;
+    border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+    border-radius: var(--radius);
     box-shadow: var(--shadow-card);
   }
 
-  /* ⌨️ Campo de INPUT padrão (com ícone à esquerda) */
-  .nuppy-input {
-    @apply w-full rounded-2xl bg-card border border-border px-4 py-3 pl-11 text-sm outline-none transition;
-    @apply focus:border-primary focus:ring-2 focus:ring-primary/30;   /* quando focado vira laranja */
+  /* ✨ Card "flutuante" — usado em destaques importantes (hero, modal) */
+  .nuppy-card-float {
+    background: var(--gradient-warm);
+    border: 1px solid color-mix(in oklab, var(--brand-soft) 30%, transparent);
+    border-radius: calc(var(--radius) + 6px);
+    box-shadow: var(--shadow-float);
   }
 
-  /* 📝 TEXTAREA (caixa de texto grande, para descrições) */
+  /* ⌨️ INPUT padrão (com ícone à esquerda) */
+  .nuppy-input {
+    @apply w-full rounded-2xl bg-card border border-border px-4 py-3 pl-11 text-sm outline-none transition;
+    @apply focus:border-primary focus:ring-2 focus:ring-primary/30;
+  }
+
+  /* 📝 TEXTAREA */
   .nuppy-textarea {
     @apply w-full rounded-2xl bg-card border border-border px-3 py-2 text-sm outline-none transition;
     @apply focus:border-primary focus:ring-2 focus:ring-primary/30;
   }
 
-  /* 🟧 BOTÃO PRINCIPAL — laranja, cheio, com leve sombra
-     Usado nas ações primárias: "Entrar", "Cadastrar", "Salvar"… */
+  /* 🟧 BOTÃO PRINCIPAL — gradiente laranja → caramelo, com sombra suave */
   .nuppy-btn-primary {
-    @apply w-full rounded-full bg-primary text-primary-foreground font-display text-lg py-3 shadow-[var(--shadow-soft)] transition active:scale-[0.98] hover:brightness-105;
+    @apply w-full rounded-full text-primary-foreground font-display text-lg py-3.5 shadow-[var(--shadow-soft)] transition active:scale-[0.98] hover:brightness-105;
+    background-image: var(--gradient-primary);
   }
 
-  /* ⬜ BOTÃO SECUNDÁRIO (fantasma) — fundo branco, borda fina
-     Usado em ações alternativas: "Continuar com Google", "Cancelar"… */
+  /* ⬜ BOTÃO SECUNDÁRIO (fantasma) */
   .nuppy-btn-ghost {
-    @apply w-full rounded-full border border-border bg-card text-foreground font-display text-base py-3 flex items-center justify-center gap-2 transition hover:bg-accent;
+    @apply w-full rounded-full border border-border bg-card text-foreground font-display text-base py-3 flex items-center justify-center gap-2 transition hover:bg-accent hover:border-brand-soft;
+  }
+
+  /* 🏷️ Chip/pill genérico (categorias, tags) */
+  .nuppy-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-3 py-1 text-xs font-display border border-border/60;
+  }
+
+  /* 📰 Cabeçalho de seção padronizado */
+  .nuppy-section-title {
+    @apply font-display text-lg text-brand tracking-tight;
   }
 }
 
@@ -202,4 +241,26 @@
   100% { transform: scale(1.4); opacity: 0; }
 }
 .animate-heart-pop { animation: heart-pop 700ms ease-out forwards; }
+
+/* ⬆️ Entrada suave (cards, listas) */
+@keyframes fade-up {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0);   }
+}
+.animate-fade-up { animation: fade-up 420ms ease-out both; }
+
+/* ✨ Brilho deslizante (skeleton/loading premium) */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0;  }
+}
+.shimmer {
+  background: linear-gradient(90deg,
+    color-mix(in oklab, var(--muted) 80%, transparent) 0%,
+    color-mix(in oklab, var(--card)  90%, transparent) 50%,
+    color-mix(in oklab, var(--muted) 80%, transparent) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
 
