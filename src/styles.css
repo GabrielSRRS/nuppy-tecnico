@@ -179,35 +179,53 @@
     background-size: 100% 100%;
   }
 
-  /* 🟦 Card branco padrão (caixinha com sombra) */
+  /* 🟦 Card padrão — branco quente, borda sutil e sombra macia */
   .nuppy-card {
     background: var(--card);
-    border-radius: 1.25rem;
+    border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+    border-radius: var(--radius);
     box-shadow: var(--shadow-card);
   }
 
-  /* ⌨️ Campo de INPUT padrão (com ícone à esquerda) */
-  .nuppy-input {
-    @apply w-full rounded-2xl bg-card border border-border px-4 py-3 pl-11 text-sm outline-none transition;
-    @apply focus:border-primary focus:ring-2 focus:ring-primary/30;   /* quando focado vira laranja */
+  /* ✨ Card "flutuante" — usado em destaques importantes (hero, modal) */
+  .nuppy-card-float {
+    background: var(--gradient-warm);
+    border: 1px solid color-mix(in oklab, var(--brand-soft) 30%, transparent);
+    border-radius: calc(var(--radius) + 6px);
+    box-shadow: var(--shadow-float);
   }
 
-  /* 📝 TEXTAREA (caixa de texto grande, para descrições) */
+  /* ⌨️ INPUT padrão (com ícone à esquerda) */
+  .nuppy-input {
+    @apply w-full rounded-2xl bg-card border border-border px-4 py-3 pl-11 text-sm outline-none transition;
+    @apply focus:border-primary focus:ring-2 focus:ring-primary/30;
+  }
+
+  /* 📝 TEXTAREA */
   .nuppy-textarea {
     @apply w-full rounded-2xl bg-card border border-border px-3 py-2 text-sm outline-none transition;
     @apply focus:border-primary focus:ring-2 focus:ring-primary/30;
   }
 
-  /* 🟧 BOTÃO PRINCIPAL — laranja, cheio, com leve sombra
-     Usado nas ações primárias: "Entrar", "Cadastrar", "Salvar"… */
+  /* 🟧 BOTÃO PRINCIPAL — gradiente laranja → caramelo, com sombra suave */
   .nuppy-btn-primary {
-    @apply w-full rounded-full bg-primary text-primary-foreground font-display text-lg py-3 shadow-[var(--shadow-soft)] transition active:scale-[0.98] hover:brightness-105;
+    @apply w-full rounded-full text-primary-foreground font-display text-lg py-3.5 shadow-[var(--shadow-soft)] transition active:scale-[0.98] hover:brightness-105;
+    background-image: var(--gradient-primary);
   }
 
-  /* ⬜ BOTÃO SECUNDÁRIO (fantasma) — fundo branco, borda fina
-     Usado em ações alternativas: "Continuar com Google", "Cancelar"… */
+  /* ⬜ BOTÃO SECUNDÁRIO (fantasma) */
   .nuppy-btn-ghost {
-    @apply w-full rounded-full border border-border bg-card text-foreground font-display text-base py-3 flex items-center justify-center gap-2 transition hover:bg-accent;
+    @apply w-full rounded-full border border-border bg-card text-foreground font-display text-base py-3 flex items-center justify-center gap-2 transition hover:bg-accent hover:border-brand-soft;
+  }
+
+  /* 🏷️ Chip/pill genérico (categorias, tags) */
+  .nuppy-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-3 py-1 text-xs font-display border border-border/60;
+  }
+
+  /* 📰 Cabeçalho de seção padronizado */
+  .nuppy-section-title {
+    @apply font-display text-lg text-brand tracking-tight;
   }
 }
 
