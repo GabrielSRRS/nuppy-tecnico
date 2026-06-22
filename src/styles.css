@@ -40,9 +40,12 @@
   --color-brand: var(--brand);
   --color-brand-soft: var(--brand-soft);
   --color-love: var(--love);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
 
-  --shadow-soft: 0 8px 24px -10px color-mix(in oklab, var(--primary) 35%, transparent);
-  --shadow-card: 0 4px 14px -6px color-mix(in oklab, var(--brand) 25%, transparent);
+  --shadow-soft: 0 10px 30px -12px color-mix(in oklab, var(--primary) 45%, transparent);
+  --shadow-card: 0 6px 20px -10px color-mix(in oklab, var(--brand) 28%, transparent);
+  --shadow-float: 0 20px 50px -20px color-mix(in oklab, var(--brand) 40%, transparent);
 }
 
 /* ============================================================================
