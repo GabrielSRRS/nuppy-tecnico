@@ -45,45 +45,68 @@
   --shadow-card: 0 4px 14px -6px color-mix(in oklab, var(--brand) 25%, transparent);
 }
 
+/* ============================================================================
+ *  🎨 PALETA DE CORES DO APP (MODO CLARO)
+ * ----------------------------------------------------------------------------
+ *  Aqui ficam TODAS as cores. Se você quiser MUDAR A IDENTIDADE VISUAL
+ *  do app, é AQUI que mexe — uma única troca aqui muda em todas as telas.
+ *
+ *  As cores são em formato `oklch(luminosidade chroma matiz)`:
+ *    • luminosidade → 0 = preto, 1 = branco
+ *    • chroma       → 0 = cinza, valores maiores = cor mais "viva"
+ *    • matiz        → ângulo (0 = vermelho, 60 = amarelo/laranja, 240 = azul)
+ * ========================================================================== */
 :root {
-  --radius: 1rem;
+  --radius: 1rem;                                   /* cantos arredondados padrão dos cards/botões */
 
-  /* Nuppy palette: cream, warm orange, chocolate brown */
-  --background: oklch(0.975 0.018 80);           /* #FBF6EC cream */
-  --foreground: oklch(0.32 0.08 45);              /* deep chocolate */
+  /* 🟫 Fundo geral do app (creme bem clarinho) */
+  --background: oklch(0.975 0.018 80);              /* #FBF6EC — cor das paredes do app */
+  --foreground: oklch(0.32 0.08 45);                /* cor padrão de TEXTO (marrom-chocolate) */
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.32 0.08 45);
+  /* ⬜ Cards (caixinhas brancas que envolvem conteúdo) */
+  --card: oklch(1 0 0);                             /* branco puro do card */
+  --card-foreground: oklch(0.32 0.08 45);           /* texto dentro do card */
 
-  --popover: oklch(1 0 0);
+  --popover: oklch(1 0 0);                          /* fundo de menus suspensos */
   --popover-foreground: oklch(0.32 0.08 45);
 
-  --primary: oklch(0.76 0.16 60);                 /* warm orange #F2A847 */
-  --primary-foreground: oklch(1 0 0);
+  /* 🟧 COR PRIMÁRIA — é a cor dos BOTÕES principais (laranja Nuppy)
+     ⚠️ Trocar isto muda a cor de quase TODOS os botões do app! */
+  --primary: oklch(0.76 0.16 60);                   /* #F2A847 — laranja quentinho */
+  --primary-foreground: oklch(1 0 0);               /* cor do texto DENTRO do botão laranja (branco) */
 
-  --secondary: oklch(0.94 0.04 75);               /* light peach */
+  /* 🟨 Cor secundária (pêssego clarinho) — fundos suaves */
+  --secondary: oklch(0.94 0.04 75);
   --secondary-foreground: oklch(0.38 0.10 45);
 
+  /* ⬜ Tons cinza/neutros (textos desabilitados, divisores, etc.) */
   --muted: oklch(0.94 0.02 80);
-  --muted-foreground: oklch(0.52 0.04 50);
+  --muted-foreground: oklch(0.52 0.04 50);          /* cor dos textos secundários (cinza) */
 
-  --accent: oklch(0.88 0.07 70);                  /* soft apricot */
+  --accent: oklch(0.88 0.07 70);                    /* damasco suave — destaques */
   --accent-foreground: oklch(0.32 0.08 45);
 
-  --destructive: oklch(0.62 0.22 25);
+  /* 🟥 Cor de PERIGO — botões de excluir, alertas de erro */
+  --destructive: oklch(0.62 0.22 25);               /* vermelho */
   --destructive-foreground: oklch(1 0 0);
 
-  --border: oklch(0.88 0.03 70);
-  --input: oklch(0.92 0.025 75);
-  --ring: oklch(0.76 0.16 60);
+  --border: oklch(0.88 0.03 70);                    /* cor das BORDAS/contornos */
+  --input: oklch(0.92 0.025 75);                    /* fundo dos campos de input */
+  --ring: oklch(0.76 0.16 60);                      /* anel quando um input está focado (laranja) */
 
-  --cream: oklch(0.97 0.025 80);
-  --paw: oklch(0.88 0.05 70);
-  --brand: oklch(0.42 0.12 45);                   /* chocolate brand */
-  --brand-soft: oklch(0.55 0.13 45);
-  --love: oklch(0.65 0.22 20);                    /* coral heart */
+  /* 🐾 CORES EXCLUSIVAS DO NUPPY (usadas como `text-brand`, `bg-love`, etc.) */
+  --cream: oklch(0.97 0.025 80);                    /* creme bem claro (fundo decorativo) */
+  --paw: oklch(0.88 0.05 70);                       /* cor das "patinhas" no fundo */
+  --brand: oklch(0.42 0.12 45);                     /* MARROM-CHOCOLATE do logo Nuppy */
+  --brand-soft: oklch(0.55 0.13 45);                /* versão mais clara do marrom */
+  --love: oklch(0.65 0.22 20);                      /* CORAL do coração (curtir) */
 }
 
+/* ============================================================================
+ *  🌙 PALETA DO MODO ESCURO
+ *  Aplicada quando o <html> tem a classe `.dark` (ex.: tema noturno).
+ *  Use os MESMOS NOMES das variáveis acima, só com valores escuros.
+ * ========================================================================== */
 .dark {
   --background: oklch(0.22 0.03 50);
   --foreground: oklch(0.96 0.02 80);
@@ -110,14 +133,21 @@
   --love: oklch(0.7 0.22 20);
 }
 
+/* ============================================================================
+ *  ESTILOS BASE — aplicados automaticamente em todo HTML
+ * ========================================================================== */
 @layer base {
-  * { border-color: var(--color-border); }
+  * { border-color: var(--color-border); }                          /* cor padrão de qualquer borda */
   html, body { background-color: var(--color-background); color: var(--color-foreground); }
-  body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
-  h1, h2, h3, h4, .font-display { font-family: var(--font-display); letter-spacing: -0.01em; }
+  body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }  /* fonte do texto normal */
+  h1, h2, h3, h4, .font-display { font-family: var(--font-display); letter-spacing: -0.01em; } /* fonte dos títulos */
 }
 
+/* ============================================================================
+ *  COMPONENTES REUTILIZÁVEIS  (use estas classes no JSX direto)
+ * ========================================================================== */
 @layer components {
+  /* 🐾 Fundo decorado com "patinhas" — usado nas telas grandes (auth, etc.) */
   .nuppy-bg {
     background-color: var(--cream);
     background-image:
@@ -128,32 +158,43 @@
     background-size: 100% 100%;
   }
 
+  /* 🟦 Card branco padrão (caixinha com sombra) */
   .nuppy-card {
     background: var(--card);
     border-radius: 1.25rem;
     box-shadow: var(--shadow-card);
   }
 
+  /* ⌨️ Campo de INPUT padrão (com ícone à esquerda) */
   .nuppy-input {
     @apply w-full rounded-2xl bg-card border border-border px-4 py-3 pl-11 text-sm outline-none transition;
-    @apply focus:border-primary focus:ring-2 focus:ring-primary/30;
+    @apply focus:border-primary focus:ring-2 focus:ring-primary/30;   /* quando focado vira laranja */
   }
 
+  /* 📝 TEXTAREA (caixa de texto grande, para descrições) */
   .nuppy-textarea {
     @apply w-full rounded-2xl bg-card border border-border px-3 py-2 text-sm outline-none transition;
     @apply focus:border-primary focus:ring-2 focus:ring-primary/30;
   }
 
+  /* 🟧 BOTÃO PRINCIPAL — laranja, cheio, com leve sombra
+     Usado nas ações primárias: "Entrar", "Cadastrar", "Salvar"… */
   .nuppy-btn-primary {
     @apply w-full rounded-full bg-primary text-primary-foreground font-display text-lg py-3 shadow-[var(--shadow-soft)] transition active:scale-[0.98] hover:brightness-105;
   }
 
+  /* ⬜ BOTÃO SECUNDÁRIO (fantasma) — fundo branco, borda fina
+     Usado em ações alternativas: "Continuar com Google", "Cancelar"… */
   .nuppy-btn-ghost {
     @apply w-full rounded-full border border-border bg-card text-foreground font-display text-base py-3 flex items-center justify-center gap-2 transition hover:bg-accent;
   }
 }
 
-/* Animação do coração no duplo-toque do feed social */
+/* ============================================================================
+ *  ANIMAÇÕES
+ * ========================================================================== */
+/* 💗 Coração que aparece quando o usuário dá DUPLO-TOQUE no feed social.
+   Cresce, segura por um instante e some desaparecendo pra cima. */
 @keyframes heart-pop {
   0%   { transform: scale(0.2); opacity: 0; }
   30%  { transform: scale(1.2); opacity: 1; }
@@ -161,3 +202,4 @@
   100% { transform: scale(1.4); opacity: 0; }
 }
 .animate-heart-pop { animation: heart-pop 700ms ease-out forwards; }
+
