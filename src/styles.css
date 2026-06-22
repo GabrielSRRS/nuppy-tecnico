@@ -56,50 +56,68 @@
  *    • chroma       → 0 = cinza, valores maiores = cor mais "viva"
  *    • matiz        → ângulo (0 = vermelho, 60 = amarelo/laranja, 240 = azul)
  * ========================================================================== */
+/* ============================================================================
+ *  🎨 PALETA NUPPY OFICIAL — Warm Pastel · Pet-Friendly · Soft Beige
+ * ----------------------------------------------------------------------------
+ *  HEX de referência (mexa AQUI pra mudar a identidade em TODAS as telas):
+ *    #F2EFEA  Creme claro          → background
+ *    #FFFDF9  Branco quente        → cards
+ *    #ECD2A9  Bege pastel          → accent
+ *    #D1B497  Bege rosado
+ *    #DBA262  Caramelo claro       → brand-soft
+ *    #B3A69B  Cinza quente
+ *    #9A572C  Marrom principal     → brand (títulos)
+ *    #5B351F  Marrom escuro        → foreground (texto)
+ *    #E49935  Laranja destaque     → primary (botões)
+ *    #4FA3D9  Azul coleira         → info
+ *    #A9D6F2  Azul claro
+ * ========================================================================== */
 :root {
-  --radius: 1rem;                                   /* cantos arredondados padrão dos cards/botões */
+  --radius: 1.25rem;                                /* cantos generosos = sensação premium */
 
-  /* 🟫 Fundo geral do app (creme bem clarinho) */
-  --background: oklch(0.975 0.018 80);              /* #FBF6EC — cor das paredes do app */
-  --foreground: oklch(0.32 0.08 45);                /* cor padrão de TEXTO (marrom-chocolate) */
+  --background: #F2EFEA;                            /* creme claro */
+  --foreground: #5B351F;                            /* marrom escuro — texto principal */
 
-  /* ⬜ Cards (caixinhas brancas que envolvem conteúdo) */
-  --card: oklch(1 0 0);                             /* branco puro do card */
-  --card-foreground: oklch(0.32 0.08 45);           /* texto dentro do card */
+  --card: #FFFDF9;                                  /* branco quente */
+  --card-foreground: #5B351F;
 
-  --popover: oklch(1 0 0);                          /* fundo de menus suspensos */
-  --popover-foreground: oklch(0.32 0.08 45);
+  --popover: #FFFDF9;
+  --popover-foreground: #5B351F;
 
-  /* 🟧 COR PRIMÁRIA — é a cor dos BOTÕES principais (laranja Nuppy)
-     ⚠️ Trocar isto muda a cor de quase TODOS os botões do app! */
-  --primary: oklch(0.76 0.16 60);                   /* #F2A847 — laranja quentinho */
-  --primary-foreground: oklch(1 0 0);               /* cor do texto DENTRO do botão laranja (branco) */
+  /* 🟧 CTA principal — laranja destaque */
+  --primary: #E49935;
+  --primary-foreground: #FFFDF9;
 
-  /* 🟨 Cor secundária (pêssego clarinho) — fundos suaves */
-  --secondary: oklch(0.94 0.04 75);
-  --secondary-foreground: oklch(0.38 0.10 45);
+  /* 🟨 Secundária — bege pastel */
+  --secondary: #ECD2A9;
+  --secondary-foreground: #5B351F;
 
-  /* ⬜ Tons cinza/neutros (textos desabilitados, divisores, etc.) */
-  --muted: oklch(0.94 0.02 80);
-  --muted-foreground: oklch(0.52 0.04 50);          /* cor dos textos secundários (cinza) */
+  --muted: #ECE4D7;
+  --muted-foreground: #8A7A6D;                      /* cinza quente legível */
 
-  --accent: oklch(0.88 0.07 70);                    /* damasco suave — destaques */
-  --accent-foreground: oklch(0.32 0.08 45);
+  --accent: #ECD2A9;
+  --accent-foreground: #5B351F;
 
-  /* 🟥 Cor de PERIGO — botões de excluir, alertas de erro */
-  --destructive: oklch(0.62 0.22 25);               /* vermelho */
-  --destructive-foreground: oklch(1 0 0);
+  --destructive: #C0432D;
+  --destructive-foreground: #FFFDF9;
 
-  --border: oklch(0.88 0.03 70);                    /* cor das BORDAS/contornos */
-  --input: oklch(0.92 0.025 75);                    /* fundo dos campos de input */
-  --ring: oklch(0.76 0.16 60);                      /* anel quando um input está focado (laranja) */
+  --border: #E3D6C2;
+  --input: #F6EFE2;
+  --ring: #E49935;
 
-  /* 🐾 CORES EXCLUSIVAS DO NUPPY (usadas como `text-brand`, `bg-love`, etc.) */
-  --cream: oklch(0.97 0.025 80);                    /* creme bem claro (fundo decorativo) */
-  --paw: oklch(0.88 0.05 70);                       /* cor das "patinhas" no fundo */
-  --brand: oklch(0.42 0.12 45);                     /* MARROM-CHOCOLATE do logo Nuppy */
-  --brand-soft: oklch(0.55 0.13 45);                /* versão mais clara do marrom */
-  --love: oklch(0.65 0.22 20);                      /* CORAL do coração (curtir) */
+  /* 🐾 Tokens exclusivos Nuppy */
+  --cream: #F2EFEA;
+  --paw: #ECD2A9;
+  --brand: #9A572C;                                 /* marrom principal */
+  --brand-soft: #DBA262;                            /* caramelo */
+  --love: #E07A5F;                                  /* coral do coração */
+  --info: #4FA3D9;                                  /* azul coleira */
+  --info-soft: #A9D6F2;
+
+  /* Gradientes reutilizáveis (use via background-image) */
+  --gradient-warm:    linear-gradient(135deg, #FFFDF9 0%, #F2EFEA 60%, #ECD2A9 100%);
+  --gradient-primary: linear-gradient(135deg, #E49935 0%, #DBA262 100%);
+  --gradient-brand:   linear-gradient(135deg, #9A572C 0%, #5B351F 100%);
 }
 
 /* ============================================================================
