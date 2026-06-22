@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { NuppyLogo } from "@/components/NuppyLogo";
 import { toast } from "sonner";
-import petsHero from "@/assets/pets-hero.jpg";
+import petsHero from "@/assets/pets-hero.png";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
