@@ -242,3 +242,25 @@
 }
 .animate-heart-pop { animation: heart-pop 700ms ease-out forwards; }
 
+/* ⬆️ Entrada suave (cards, listas) */
+@keyframes fade-up {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0);   }
+}
+.animate-fade-up { animation: fade-up 420ms ease-out both; }
+
+/* ✨ Brilho deslizante (skeleton/loading premium) */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0;  }
+}
+.shimmer {
+  background: linear-gradient(90deg,
+    color-mix(in oklab, var(--muted) 80%, transparent) 0%,
+    color-mix(in oklab, var(--card)  90%, transparent) 50%,
+    color-mix(in oklab, var(--muted) 80%, transparent) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+
