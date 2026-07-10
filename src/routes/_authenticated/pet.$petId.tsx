@@ -1,14 +1,24 @@
 /* ============================================================================
- *  PÁGINA: /pet/$petId  —  DETALHE/EDIÇÃO DE UM PET
+ *  PÁGINA: /pet/$petId  —  DETALHE DO PET
  * ----------------------------------------------------------------------------
- *  Mostra o perfil completo do pet (capa, badges de saúde, personalidade,
- *  notas médicas) e permite editar / excluir. Lê da tabela `pets` filtrando
- *  pelo ID na URL ($petId).
+ *  Layout em blocos claros:
+ *    1) HERO: foto grande + botão voltar + badges flutuantes
+ *    2) IDENTIDADE: nome, raça, sexo, porte + status (vacinado/castrado)
+ *    3) DADOS RÁPIDOS: 4 cards (idade, peso, cor, cidade)
+ *    4) SOBRE: descrição/bio
+ *    5) PERSONALIDADE & GOSTOS: chips + tags
+ *    6) SAÚDE: alergias, notas, microchip, veterinário
+ *    7) MARCOS: adoção, nascimento
+ *    8) TUTOR: card no rodapé
  * ========================================================================== */
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { ChevronLeft, MapPin, Cake, Scale, Heart, Stethoscope, Sparkles, Phone, Calendar, Palette, Ruler } from "lucide-react";
+import {
+  ChevronLeft, MapPin, Cake, Scale, Heart, Stethoscope, Sparkles,
+  Phone, Calendar, Palette, ShieldCheck, Syringe, Scissors, Fingerprint,
+  AlertTriangle, User, Home,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/MobileShell";
 
@@ -60,151 +70,203 @@ function PetBody({ petId }: { petId: string }) {
 
   return (
     <>
+      {/* ============= 1) HERO ============= */}
       <div className="relative">
-        <div className="h-72 bg-muted overflow-hidden">
+        <div className="h-80 bg-muted overflow-hidden">
           {pet.photo_url ? (
             <img src={pet.photo_url} alt={pet.name} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full grid place-items-center text-7xl">🐾</div>
+            <div className="w-full h-full grid place-items-center text-8xl bg-gradient-to-br from-secondary to-accent">🐾</div>
           )}
+          {/* gradient overlay */}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/60 to-transparent" />
         </div>
-        <Link to="/home" className="absolute top-4 left-4 size-10 grid place-items-center rounded-full bg-card/90 backdrop-blur shadow-card">
+        <Link to="/perfil" className="absolute top-4 left-4 size-10 grid place-items-center rounded-full bg-card/90 backdrop-blur shadow-card">
           <ChevronLeft className="size-5 text-brand" />
         </Link>
+        {/* Badges flutuantes de saúde */}
+        <div className="absolute top-4 right-4 flex flex-col gap-1.5">
+          {pet.vaccinated && <FloatBadge icon={<Syringe className="size-3" />} label="Vacinado" />}
+          {pet.neutered && <FloatBadge icon={<Scissors className="size-3" />} label="Castrado" />}
+        </div>
       </div>
-      <div className="px-4 -mt-8 relative space-y-4 pb-8">
-        <div className="nuppy-card p-5">
-          <div className="flex items-start justify-between gap-2">
+
+      <div className="px-4 -mt-16 relative space-y-4 pb-10">
+        {/* ============= 2) IDENTIDADE ============= */}
+        <section className="nuppy-card-float p-5">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="font-display text-3xl text-brand">{pet.name}</h1>
-              <p className="text-sm text-muted-foreground">
-                {pet.gender && <span>{pet.gender === "Macho" ? "♂ " : "♀ "}</span>}
+              <h1 className="font-display text-3xl text-brand leading-tight">{pet.name}</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {pet.gender && <span className="mr-1">{pet.gender === "Macho" ? "♂" : "♀"}</span>}
                 {pet.breed ?? pet.species}
                 {pet.size && <span> · {pet.size}</span>}
               </p>
-            </div>
-            <div className="flex gap-1 shrink-0">
-              {pet.vaccinated && <Badge>💉 Vacinado</Badge>}
-              {pet.neutered && <Badge>✂️ Castrado</Badge>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            <Info icon={<Cake className="size-4" />} label="Idade" value={age} />
-            <Info icon={<Scale className="size-4" />} label="Peso" value={pet.weight ?? "—"} />
-            <Info icon={<MapPin className="size-4" />} label="Cidade" value={pet.city ?? "—"} />
-          </div>
-
-          {(pet.color || pet.birthdate) && (
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {pet.color && <Info icon={<Palette className="size-4" />} label="Cor" value={pet.color} />}
-              {pet.birthdate && <Info icon={<Calendar className="size-4" />} label="Nascimento" value={new Date(pet.birthdate).toLocaleDateString("pt-BR")} />}
-            </div>
-          )}
-
-          {pet.description && (
-            <Block icon={<Sparkles className="size-4" />} title="Sobre">
-              <p className="text-sm text-foreground/80 whitespace-pre-wrap">{pet.description}</p>
-            </Block>
-          )}
-
-          {(pet.personality || pet.favorite_food || pet.favorite_toy) && (
-            <Block icon={<Heart className="size-4" />} title="Personalidade & Gostos">
-              {pet.personality && <p className="text-sm text-foreground/80">{pet.personality}</p>}
-              {(pet.favorite_food || pet.favorite_toy) && (
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {pet.favorite_food && <Tag label="🍖 Comida" value={pet.favorite_food} />}
-                  {pet.favorite_toy && <Tag label="🧸 Brinquedo" value={pet.favorite_toy} />}
-                </div>
-              )}
-            </Block>
-          )}
-
-          {(pet.allergies || pet.medical_notes || pet.microchip || pet.vet_name) && (
-            <Block icon={<Stethoscope className="size-4" />} title="Saúde">
-              {pet.allergies && <Row label="Alergias" value={pet.allergies} />}
-              {pet.medical_notes && <Row label="Observações" value={pet.medical_notes} />}
-              {pet.microchip && <Row label="Microchip" value={pet.microchip} />}
-              {pet.vet_name && (
-                <Row
-                  label="Veterinário"
-                  value={
-                    <span className="flex items-center gap-2">
-                      {pet.vet_name}
-                      {pet.vet_phone && (
-                        <a href={`tel:${pet.vet_phone}`} className="inline-flex items-center gap-1 text-primary">
-                          <Phone className="size-3" /> {pet.vet_phone}
-                        </a>
-                      )}
-                    </span>
-                  }
-                />
-              )}
-            </Block>
-          )}
-
-          {pet.adopted_at && (
-            <Block icon={<Ruler className="size-4" />} title="Marcos">
-              <Row label="Chegada em casa" value={new Date(pet.adopted_at).toLocaleDateString("pt-BR")} />
-            </Block>
-          )}
-
-          <div className="mt-5 flex items-center gap-3 pt-4 border-t border-border">
-            <div className="size-10 rounded-full bg-muted overflow-hidden grid place-items-center">
-              {pet.profile?.avatar_url ? (
-                <img src={pet.profile.avatar_url} alt="" className="w-full h-full object-cover" />
-              ) : "👤"}
-            </div>
-            <div>
-              <p className="font-display text-sm text-brand">Tutor</p>
-              <p className="text-sm text-muted-foreground">@{pet.profile?.username}</p>
+              {/* chips de espécie */}
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <Chip>{pet.species}</Chip>
+                {pet.gender && <Chip>{pet.gender}</Chip>}
+                {pet.size && <Chip>Porte {pet.size}</Chip>}
+              </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* ============= 3) DADOS RÁPIDOS ============= */}
+        <section className="grid grid-cols-2 gap-2">
+          <QuickInfo icon={<Cake className="size-4" />} label="Idade" value={age} />
+          <QuickInfo icon={<Scale className="size-4" />} label="Peso" value={pet.weight ?? "—"} />
+          <QuickInfo icon={<Palette className="size-4" />} label="Cor" value={pet.color ?? "—"} />
+          <QuickInfo icon={<MapPin className="size-4" />} label="Cidade" value={pet.city ?? "—"} />
+        </section>
+
+        {/* ============= 4) SOBRE ============= */}
+        {pet.description && (
+          <SectionCard icon={<Sparkles className="size-4" />} title="Sobre">
+            <p className="text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">{pet.description}</p>
+          </SectionCard>
+        )}
+
+        {/* ============= 5) PERSONALIDADE & GOSTOS ============= */}
+        {(pet.personality || pet.favorite_food || pet.favorite_toy) && (
+          <SectionCard icon={<Heart className="size-4" />} title="Personalidade & Gostos">
+            {pet.personality && <p className="text-sm text-foreground/80 mb-3">{pet.personality}</p>}
+            {(pet.favorite_food || pet.favorite_toy) && (
+              <div className="grid grid-cols-2 gap-2">
+                {pet.favorite_food && <FavTag emoji="🍖" label="Comida" value={pet.favorite_food} />}
+                {pet.favorite_toy && <FavTag emoji="🧸" label="Brinquedo" value={pet.favorite_toy} />}
+              </div>
+            )}
+          </SectionCard>
+        )}
+
+        {/* ============= 6) SAÚDE ============= */}
+        {(pet.allergies || pet.medical_notes || pet.microchip || pet.vet_name || pet.vaccinated || pet.neutered) && (
+          <SectionCard icon={<Stethoscope className="size-4" />} title="Saúde">
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              <HealthBadge active={!!pet.vaccinated} icon={<Syringe className="size-3" />} label="Vacinado" />
+              <HealthBadge active={!!pet.neutered} icon={<Scissors className="size-3" />} label="Castrado" />
+              <HealthBadge active={!!pet.microchip} icon={<Fingerprint className="size-3" />} label="Chip" />
+            </div>
+            {pet.allergies && (
+              <HealthRow icon={<AlertTriangle className="size-4 text-orange-500" />} label="Alergias" value={pet.allergies} />
+            )}
+            {pet.medical_notes && (
+              <HealthRow icon={<ShieldCheck className="size-4 text-primary" />} label="Observações" value={pet.medical_notes} />
+            )}
+            {pet.microchip && (
+              <HealthRow icon={<Fingerprint className="size-4 text-primary" />} label="Microchip" value={<span className="font-mono">{pet.microchip}</span>} />
+            )}
+            {pet.vet_name && (
+              <HealthRow
+                icon={<Stethoscope className="size-4 text-primary" />}
+                label="Veterinário"
+                value={
+                  <span className="flex items-center gap-2 flex-wrap">
+                    {pet.vet_name}
+                    {pet.vet_phone && (
+                      <a href={`tel:${pet.vet_phone}`} className="inline-flex items-center gap-1 text-primary underline">
+                        <Phone className="size-3" /> {pet.vet_phone}
+                      </a>
+                    )}
+                  </span>
+                }
+              />
+            )}
+          </SectionCard>
+        )}
+
+        {/* ============= 7) MARCOS ============= */}
+        {(pet.birthdate || pet.adopted_at) && (
+          <SectionCard icon={<Calendar className="size-4" />} title="Marcos">
+            {pet.birthdate && (
+              <HealthRow icon={<Cake className="size-4 text-primary" />} label="Nascimento" value={new Date(pet.birthdate).toLocaleDateString("pt-BR")} />
+            )}
+            {pet.adopted_at && (
+              <HealthRow icon={<Home className="size-4 text-primary" />} label="Chegada em casa" value={new Date(pet.adopted_at).toLocaleDateString("pt-BR")} />
+            )}
+          </SectionCard>
+        )}
+
+        {/* ============= 8) TUTOR ============= */}
+        <section className="nuppy-card p-4 flex items-center gap-3">
+          <div className="size-12 rounded-full bg-muted overflow-hidden grid place-items-center border-2 border-card shadow-soft">
+            {pet.profile?.avatar_url ? (
+              <img src={pet.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+            ) : <User className="size-5 text-muted-foreground" />}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Tutor</p>
+            <p className="font-display text-sm text-brand truncate">{pet.profile?.display_name ?? pet.profile?.username}</p>
+            <p className="text-xs text-muted-foreground truncate">@{pet.profile?.username}</p>
+          </div>
+        </section>
       </div>
     </>
   );
 }
 
-function Badge({ children }: { children: React.ReactNode }) {
-  return <span className="rounded-full bg-primary/15 text-primary text-[10px] font-display px-2 py-0.5 whitespace-nowrap">{children}</span>;
+/* ---------- pequenos componentes visuais ---------- */
+
+function FloatBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <span className="rounded-full bg-card/95 backdrop-blur px-2.5 py-1 text-[11px] font-display text-brand shadow-soft inline-flex items-center gap-1">
+      {icon} {label}
+    </span>
+  );
 }
 
-function Info({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function Chip({ children }: { children: React.ReactNode }) {
+  return <span className="nuppy-chip text-[11px]">{children}</span>;
+}
+
+function QuickInfo({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-secondary p-3 text-center">
-      <div className="flex justify-center text-primary mb-1">{icon}</div>
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="font-display text-sm text-brand">{value}</p>
+    <div className="nuppy-card p-3">
+      <div className="flex items-center gap-1.5 text-primary mb-1">{icon}<span className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</span></div>
+      <p className="font-display text-brand text-base leading-tight">{value}</p>
     </div>
   );
 }
 
-function Block({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function SectionCard({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
-    <div className="mt-4">
-      <h3 className="font-display text-brand mb-1 flex items-center gap-1 text-sm uppercase tracking-wide">
+    <section className="nuppy-card p-4">
+      <h3 className="font-display text-brand text-sm uppercase tracking-wide flex items-center gap-1.5 mb-3">
         <span className="text-primary">{icon}</span>{title}
       </h3>
-      <div className="space-y-1">{children}</div>
+      <div className="space-y-2">{children}</div>
+    </section>
+  );
+}
+
+function HealthBadge({ active, icon, label }: { active: boolean; icon: React.ReactNode; label: string }) {
+  return (
+    <span className={`rounded-full px-2.5 py-1 text-[11px] font-display inline-flex items-center gap-1 ${
+      active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground line-through"
+    }`}>
+      {icon} {label}
+    </span>
+  );
+}
+
+function HealthRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2 text-sm py-1">
+      <span className="mt-0.5">{icon}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
+        <div className="text-foreground/90">{value}</div>
+      </div>
     </div>
   );
 }
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
+function FavTag({ emoji, label, value }: { emoji: string; label: string; value: string }) {
   return (
-    <div className="text-sm">
-      <span className="text-muted-foreground">{label}: </span>
-      <span className="text-foreground/90">{value}</span>
-    </div>
-  );
-}
-
-function Tag({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-accent/50 p-2">
-      <p className="text-[10px] font-display text-brand">{label}</p>
-      <p className="text-sm">{value}</p>
+    <div className="rounded-xl bg-accent/40 border border-border p-2.5">
+      <p className="text-[10px] font-display text-muted-foreground uppercase tracking-wide">{emoji} {label}</p>
+      <p className="text-sm text-brand font-display">{value}</p>
     </div>
   );
 }

@@ -1,17 +1,20 @@
 /* ============================================================================
  *  PÁGINA: /perfil  —  PERFIL DO TUTOR
  * ----------------------------------------------------------------------------
- *  Mostra os dados do usuário logado:
- *    • avatar, nome, bio (tabela `profiles`)
- *    • pets cadastrados   (tabela `pets`)
- *    • posts publicados   (tabela `posts`)
- *    • vídeos curtidos    (tabela `likes` + `posts`)
- *  Header tem um ícone de engrenagem que leva para /configuracoes.
+ *  Estrutura em 3 blocos claros:
+ *    1) HERO: avatar grande, nome, @user, bio, cidade, botão editar
+ *    2) STATS: pets, posts, seguidores em cards destacados
+ *    3) ABAS: [Meus Pets] · [Posts] · [Curtidos]  — troca conteúdo abaixo
+ *
+ *  Dica p/ mexer:
+ *    • Cor do header e ícones → text-brand (definido em styles.css)
+ *    • Fundo dos cards → nuppy-card / bg-card
+ *    • Botão primário → nuppy-btn-primary (gradient definido em styles.css)
  * ========================================================================== */
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, Suspense } from "react";
-import { ChevronLeft, Menu, Settings, Plus, Pencil } from "lucide-react";
+import { ChevronLeft, Settings, Plus, Pencil, MapPin, PawPrint, Grid3x3, Heart, Camera, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/MobileShell";
 import { toast } from "sonner";
@@ -44,12 +47,12 @@ const meQuery = {
   },
 };
 
-function PerfilPage() {
-  const navigate = useNavigate();
-  void navigate;
+type Tab = "pets" | "posts" | "liked";
 
+function PerfilPage() {
   return (
     <MobileShell>
+      {/* HEADER — voltar / título / config */}
       <header className="px-4 pt-4 flex items-center justify-between">
         <Link to="/home" className="size-9 grid place-items-center rounded-full hover:bg-accent">
           <ChevronLeft className="size-5 text-brand" />
@@ -70,111 +73,190 @@ function PerfilBody() {
   const { data } = useSuspenseQuery(meQuery);
   const { profile, pets, posts, likedVideos } = data;
   const [editing, setEditing] = useState(false);
+  const [tab, setTab] = useState<Tab>("pets");
 
   return (
-    <div className="px-4 pt-4">
-      <div className="flex flex-col items-center text-center">
-        <div className="size-32 rounded-full bg-muted border-4 border-card shadow-card overflow-hidden grid place-items-center">
-          {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+    <div className="px-4 pt-3 pb-8">
+      {/* ================ 1) HERO ================ */}
+      <section className="relative nuppy-card-float p-5 pt-6 text-center overflow-hidden">
+        {/* Faixa decorativa de fundo */}
+        <div
+          className="absolute inset-x-0 top-0 h-24 opacity-70"
+          style={{ background: "var(--gradient-warm)" }}
+          aria-hidden
+        />
+        <div className="relative">
+          <div className="mx-auto size-28 rounded-full bg-muted border-4 border-card shadow-float overflow-hidden grid place-items-center">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-5xl">🐾</span>
+            )}
+          </div>
+          <h2 className="mt-3 font-display text-2xl text-brand leading-tight">{profile?.display_name ?? "Você"}</h2>
+          <p className="text-sm text-muted-foreground">@{profile?.username ?? "tutor"}</p>
+
+          {/* Badges: cidade + nº de pets */}
+          <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+            {profile?.city && (
+              <span className="nuppy-chip inline-flex items-center gap-1">
+                <MapPin className="size-3" /> {profile.city}
+              </span>
+            )}
+            <span className="nuppy-chip inline-flex items-center gap-1">
+              <PawPrint className="size-3" /> {pets.length} {pets.length === 1 ? "pet" : "pets"}
+            </span>
+            {posts.length > 0 && (
+              <span className="nuppy-chip inline-flex items-center gap-1">
+                <Sparkles className="size-3" /> Ativo
+              </span>
+            )}
+          </div>
+
+          {/* Bio */}
+          {profile?.bio ? (
+            <p className="text-sm mt-3 text-foreground/80 max-w-[300px] mx-auto">{profile.bio}</p>
           ) : (
-            <span className="text-5xl">🐾</span>
+            <p className="text-xs mt-3 italic text-muted-foreground">Adicione uma biografia para se apresentar 💬</p>
           )}
+
+          <button
+            onClick={() => setEditing(true)}
+            className="mt-4 px-6 py-2 rounded-full bg-primary text-primary-foreground font-display text-sm shadow-soft inline-flex items-center gap-2 hover:brightness-105 transition"
+          >
+            <Pencil className="size-4" /> Editar perfil
+          </button>
         </div>
-        <h2 className="mt-3 font-display text-2xl text-brand">{profile?.display_name ?? "Você"}</h2>
-        <p className="text-sm text-muted-foreground">@{profile?.username}</p>
-        <p className="text-sm mt-1 text-foreground/80">{profile?.bio ?? "Adicione uma biografia"}</p>
-        <button onClick={() => setEditing(true)} className="mt-3 px-8 py-2 rounded-full bg-primary text-primary-foreground font-display text-sm shadow-soft inline-flex items-center gap-2">
-          <Pencil className="size-4" /> Editar
-        </button>
+      </section>
+
+      {/* ================ 2) STATS ================ */}
+      <section className="mt-4 grid grid-cols-3 gap-2">
+        <StatCard icon={<PawPrint className="size-4" />} value={pets.length} label="Pets" />
+        <StatCard icon={<Grid3x3 className="size-4" />} value={posts.length} label="Posts" />
+        <StatCard icon={<Heart className="size-4" />} value={likedVideos.length} label="Curtidos" />
+      </section>
+
+      {/* ================ 3) ABAS ================ */}
+      <nav className="mt-5 flex bg-muted/60 p-1 rounded-full">
+        <TabBtn active={tab === "pets"} onClick={() => setTab("pets")} icon={<PawPrint className="size-4" />} label="Pets" />
+        <TabBtn active={tab === "posts"} onClick={() => setTab("posts")} icon={<Grid3x3 className="size-4" />} label="Posts" />
+        <TabBtn active={tab === "liked"} onClick={() => setTab("liked")} icon={<Heart className="size-4" />} label="Curtidos" />
+      </nav>
+
+      <div className="mt-4">
+        {tab === "pets" && <PetsGrid pets={pets} />}
+        {tab === "posts" && <PostsGrid posts={posts} />}
+        {tab === "liked" && <LikedGrid videos={likedVideos} />}
       </div>
-
-      <Stats pets={pets.length} posts={posts.length} />
-
-      <section className="mt-6">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-display text-brand">Meus pets</h3>
-          <Link to="/pet/novo" className="text-sm font-display text-primary inline-flex items-center gap-1">
-            <Plus className="size-4" /> Adicionar
-          </Link>
-        </div>
-        {pets.length === 0 ? (
-          <div className="rounded-2xl bg-secondary p-5 text-center text-sm text-muted-foreground">
-            Você ainda não cadastrou nenhum pet 🐶
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-2">
-            {pets.map((p) => (
-              <Link key={p.id} to="/pet/$petId" params={{ petId: p.id }} className="aspect-square rounded-2xl overflow-hidden bg-muted relative">
-                {p.photo_url ? (
-                  <img src={p.photo_url} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full grid place-items-center text-3xl">🐾</div>
-                )}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white p-1.5 text-xs font-display">{p.name}</div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="mt-6">
-        <h3 className="font-display text-brand mb-2">Posts</h3>
-        {posts.length === 0 ? (
-          <div className="rounded-2xl bg-secondary p-5 text-center text-sm text-muted-foreground">
-            Nenhum post ainda
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-1">
-            {posts.map((p) => (
-              <div key={p.id} className="aspect-square bg-muted overflow-hidden rounded-md">
-                <img src={p.media_url} alt="" className="w-full h-full object-cover" loading="lazy" />
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="mt-6 pb-24">
-        <h3 className="font-display text-brand mb-2">❤️ Vídeos curtidos</h3>
-        {likedVideos.length === 0 ? (
-          <div className="rounded-2xl bg-secondary p-5 text-center text-sm text-muted-foreground">
-            Você ainda não curtiu nenhum vídeo
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-1">
-            {likedVideos.map((v) => (
-              <div key={v.id} className="aspect-square bg-black overflow-hidden rounded-md relative">
-                <video src={v.media_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
-                <div className="absolute bottom-1 right-1 text-white text-xs bg-black/60 rounded px-1">▶</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
 
       {editing && <EditModal profile={profile} onClose={() => setEditing(false)} />}
     </div>
   );
 }
 
-function Stats({ pets, posts }: { pets: number; posts: number }) {
+/* ------------ subcomponentes ------------ */
+
+function StatCard({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
   return (
-    <div className="mt-4 grid grid-cols-3 gap-2 nuppy-card p-3">
-      <Stat label="Pets" value={pets} />
-      <Stat label="Posts" value={posts} />
-      <Stat label="Seguidores" value={0} />
+    <div className="nuppy-card p-3 text-center">
+      <div className="mx-auto mb-1 size-8 rounded-full bg-primary/15 text-primary grid place-items-center">{icon}</div>
+      <p className="font-display text-xl text-brand leading-none">{value}</p>
+      <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
     </div>
   );
 }
-function Stat({ label, value }: { label: string; value: number }) {
+
+function TabBtn({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
-    <div className="text-center">
-      <p className="font-display text-xl text-brand">{value}</p>
-      <p className="text-xs text-muted-foreground">{label}</p>
+    <button
+      onClick={onClick}
+      className={`flex-1 py-2 rounded-full text-sm font-display transition inline-flex items-center justify-center gap-1.5 ${
+        active ? "bg-card text-brand shadow-soft" : "text-muted-foreground hover:text-brand"
+      }`}
+    >
+      {icon} {label}
+    </button>
+  );
+}
+
+function PetsGrid({ pets }: { pets: Array<{ id: string; name: string; photo_url: string | null; breed: string | null; species: string | null }> }) {
+  return (
+    <div>
+      <div className="flex justify-end mb-2">
+        <Link to="/pet/novo" className="text-sm font-display text-primary inline-flex items-center gap-1">
+          <Plus className="size-4" /> Adicionar pet
+        </Link>
+      </div>
+      {pets.length === 0 ? (
+        <EmptyState icon="🐶" text="Você ainda não cadastrou nenhum pet" cta={<Link to="/pet/novo" className="nuppy-btn-primary inline-block px-6 py-2 mt-3">Cadastrar</Link>} />
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {pets.map((p) => (
+            <Link key={p.id} to="/pet/$petId" params={{ petId: p.id }} className="nuppy-card overflow-hidden group">
+              <div className="aspect-square bg-muted relative">
+                {p.photo_url ? (
+                  <img src={p.photo_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy" />
+                ) : (
+                  <div className="w-full h-full grid place-items-center text-4xl">🐾</div>
+                )}
+              </div>
+              <div className="p-2.5">
+                <p className="font-display text-brand text-sm leading-none">{p.name}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.breed ?? p.species ?? "Pet"}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+
+function PostsGrid({ posts }: { posts: Array<{ id: string; media_url: string; media_type: string | null }> }) {
+  if (posts.length === 0) return <EmptyState icon="📸" text="Nenhum post ainda" />;
+  return (
+    <div className="grid grid-cols-3 gap-1">
+      {posts.map((p) => (
+        <div key={p.id} className="aspect-square bg-muted overflow-hidden rounded-md relative">
+          {p.media_type === "video" ? (
+            <>
+              <video src={p.media_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+              <div className="absolute bottom-1 right-1 text-white text-[10px] bg-black/60 rounded px-1">▶</div>
+            </>
+          ) : (
+            <img src={p.media_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LikedGrid({ videos }: { videos: Array<{ id: string; media_url: string }> }) {
+  if (videos.length === 0) return <EmptyState icon="❤️" text="Você ainda não curtiu nenhum vídeo" />;
+  return (
+    <div className="grid grid-cols-3 gap-1">
+      {videos.map((v) => (
+        <div key={v.id} className="aspect-square bg-black overflow-hidden rounded-md relative">
+          <video src={v.media_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+          <div className="absolute bottom-1 right-1 text-white text-[10px] bg-black/60 rounded px-1">▶</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmptyState({ icon, text, cta }: { icon: string; text: string; cta?: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl bg-secondary/60 border border-border p-8 text-center">
+      <p className="text-4xl mb-2">{icon}</p>
+      <p className="text-sm text-muted-foreground">{text}</p>
+      {cta}
+    </div>
+  );
+}
+
+/* ------------ modal editar ------------ */
 
 function EditModal({ profile, onClose }: { profile: { display_name: string | null; bio: string | null; city: string | null; avatar_url: string | null } | null; onClose: () => void }) {
   const qc = useQueryClient();
@@ -202,17 +284,17 @@ function EditModal({ profile, onClose }: { profile: { display_name: string | nul
   return (
     <div className="fixed inset-0 z-50 bg-black/50 grid place-items-end sm:place-items-center" onClick={onClose}>
       <form onClick={(e) => e.stopPropagation()} onSubmit={save} className="w-full max-w-[480px] bg-card rounded-t-3xl sm:rounded-3xl p-6 space-y-3">
-        <h3 className="font-display text-xl text-brand">Editar perfil</h3>
+        <div className="flex items-center gap-2">
+          <Camera className="size-5 text-primary" />
+          <h3 className="font-display text-xl text-brand">Editar perfil</h3>
+        </div>
         <input className="nuppy-input pl-4" placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} />
         <textarea className="w-full rounded-2xl border border-border bg-card p-3 text-sm" rows={2} placeholder="Biografia" value={bio} onChange={(e) => setBio(e.target.value)} />
         <input className="nuppy-input pl-4" placeholder="Cidade" value={city} onChange={(e) => setCity(e.target.value)} />
         <input className="nuppy-input pl-4" placeholder="URL da foto de perfil" value={avatar} onChange={(e) => setAvatar(e.target.value)} />
-        <button disabled={busy} className="nuppy-btn-primary">{busy ? "Salvando..." : "Salvar"}</button>
+        <button disabled={busy} className="nuppy-btn-primary">{busy ? "Salvando..." : "Salvar alterações"}</button>
         <button type="button" onClick={onClose} className="nuppy-btn-ghost">Cancelar</button>
       </form>
     </div>
   );
 }
-
-// keep imports used
-void Menu;
