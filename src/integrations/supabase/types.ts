@@ -255,6 +255,76 @@ export type Database = {
         }
         Relationships: []
       }
+      place_photos: {
+        Row: {
+          created_at: string
+          id: string
+          place_id: string
+          position: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          place_id: string
+          position?: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          place_id?: string
+          position?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_photos_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      place_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          place_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          place_id: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          place_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_reviews_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       places: {
         Row: {
           address: string | null
@@ -269,6 +339,7 @@ export type Database = {
           name: string
           phone: string | null
           photo_url: string | null
+          services: string[]
           updated_at: string
         }
         Insert: {
@@ -284,6 +355,7 @@ export type Database = {
           name: string
           phone?: string | null
           photo_url?: string | null
+          services?: string[]
           updated_at?: string
         }
         Update: {
@@ -299,6 +371,7 @@ export type Database = {
           name?: string
           phone?: string | null
           photo_url?: string | null
+          services?: string[]
           updated_at?: string
         }
         Relationships: []
