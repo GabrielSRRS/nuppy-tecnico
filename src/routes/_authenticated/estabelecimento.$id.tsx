@@ -230,7 +230,7 @@ function Body({ id }: { id: string }) {
                 Serviços oferecidos
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {p.services.map((s) => (
+                {(p.services as string[]).map((s: string) => (
                   <span
                     key={s}
                     className="text-xs font-display bg-accent text-brand rounded-full px-3 py-1"
