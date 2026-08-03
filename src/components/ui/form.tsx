@@ -13,6 +13,19 @@ import {
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
+/*
+  Form helpers
+  - Coleção de componentes auxiliares para integrar react-hook-form com o design system.
+  - Fornece:
+    - Form: wrapper para FormProvider
+    - FormField: combina Controller + contexto contendo o nome do campo
+    - FormItem: provê ids únicos para label/descricao/mensagem
+    - FormLabel/FormControl/FormDescription/FormMessage: componentes conectados ao estado do campo
+
+  Objetivo:
+  - Facilitar a criação de campos com validação, mensagens de erro ARIA e ligações automáticas
+    entre label/controle/descrição.
+*/
 const Form = FormProvider;
 
 type FormFieldContextValue<
@@ -30,6 +43,8 @@ const FormField = <
 >({
   ...props
 }: ControllerProps<TFieldValues, TName>) => {
+  // Provider armazena o nome do campo para que outros componentes (FormLabel, FormControl)
+  // possam recuperar metadados sem precisar receber props manualmente.
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />
@@ -51,9 +66,9 @@ const useFormField = () => {
   }
 
   const fieldState = getFieldState(fieldContext.name, formState);
-
   const { id } = itemContext;
 
+  // Retornamos ids gerados para associar label/descrição/mensagem ao controle.
   return {
     id,
     name: fieldContext.name,
@@ -72,6 +87,7 @@ const FormItemContext = React.createContext<FormItemContextValue | null>(null);
 
 const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
+    // Gera ID único usando useId para evitar colisões quando há múltiplos campos.
     const id = React.useId();
 
     return (
@@ -89,6 +105,7 @@ const FormLabel = React.forwardRef<
 >(({ className, ...props }, ref) => {
   const { error, formItemId } = useFormField();
 
+  // HtmlFor aponta para o id do FormControl (formItemId) — essencial para leitores de tela.
   return (
     <Label
       ref={ref}
@@ -106,6 +123,7 @@ const FormControl = React.forwardRef<
 >(({ ...props }, ref) => {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
+  // O slot replica as props ARIA necessárias para conectar label/descricao/mensagem ao controle.
   return (
     <Slot
       ref={ref}
@@ -142,6 +160,7 @@ const FormMessage = React.forwardRef<
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message ?? "") : children;
 
+  // Não renderiza nada quando não há mensagem — evita elementos vazios no DOM.
   if (!body) {
     return null;
   }

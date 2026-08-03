@@ -7,6 +7,16 @@ import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/*
+  Sheet
+  - Painel deslizante (drawer) com variações de posicionamento (side: top, bottom, left, right).
+  - Implementado com Radix Dialog para aproveitar a a11y e controle de foco.
+  - `sheetVariants` usa cva para definir classes que mudam conforme o `side`.
+
+  Uso comum:
+  - Mobile: bottom sheet para filtros/opções
+  - Desktop: painel lateral para detalhes
+*/
 const Sheet = SheetPrimitive.Root;
 
 const SheetTrigger = SheetPrimitive.Trigger;
@@ -54,6 +64,11 @@ interface SheetContentProps
     React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
+/*
+  SheetContent
+  - Fornece a estrutura (overlay + content) e adiciona um botão de fechar padrão.
+  - `side` controla a posição e as animações associadas.
+*/
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
@@ -61,7 +76,7 @@ const SheetContent = React.forwardRef<
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background cursor-pointer transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background cursor-pointer transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
