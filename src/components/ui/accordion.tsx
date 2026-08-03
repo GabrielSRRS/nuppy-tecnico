@@ -4,6 +4,12 @@ import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/*
+  Accordion
+  - Componentes para seções colapsáveis (acordeão). Use AccordionItem para cada seção,
+    AccordionTrigger como cabeçalho clicável e AccordionContent para o conteúdo.
+  - As animações são controladas via atributos data-state que o Radix expõe.
+*/
 const Accordion = AccordionPrimitive.Root;
 
 const AccordionItem = React.forwardRef<

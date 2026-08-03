@@ -5,6 +5,19 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
 import { cn } from "@/lib/utils";
 
+/*
+  Tooltip
+  - Wrapper sobre Radix Tooltip para padronizar o estilo das dicas (tooltips) na aplicação.
+  - Expondo Provider, Root, Trigger e Content já estilizados facilita o reuso.
+
+  Props importantes:
+  - sideOffset: distância entre o trigger e o conteúdo do tooltip (padrão = 4).
+
+  Acessibilidade:
+  - Radix cuida da maior parte da acessibilidade (aria-describedby, foco, etc.).
+  - Use TooltipTrigger em conjunto com elementos que suportem aria-describedby para
+    garantir que leitores de tela consigam identificar o conteúdo quando necessário.
+*/
 const TooltipProvider = TooltipPrimitive.Provider;
 
 const Tooltip = TooltipPrimitive.Root;
@@ -20,7 +33,8 @@ const TooltipContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-tooltip-content-transform-origin)",
+        // Classes para aparência, animação e camada superior (z-index)
+        "z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
         className,
       )}
       {...props}

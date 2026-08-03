@@ -3,6 +3,18 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
 
+/*
+  Drawer
+  - Componente que encapsula um 'drawer' (painel deslizante) usando a biblioteca `vaul`.
+  - Expondo: Drawer (Root), DrawerTrigger, DrawerPortal, DrawerClose, DrawerOverlay,
+    DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription.
+
+  Props:
+  - shouldScaleBackground: controla se o fundo deve escalar ao abrir o drawer (padrão: true)
+
+  Estrutura:
+  - DrawerContent renderiza um elemento visual (alça) e os `children` dentro do painel.
+*/
 const Drawer = ({
   shouldScaleBackground = true,
   ...props
@@ -43,6 +55,7 @@ const DrawerContent = React.forwardRef<
       )}
       {...props}
     >
+      {/* Alça visual para indicar que o painel pode ser arrastado/fechado no mobile */}
       <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
       {children}
     </DrawerPrimitive.Content>

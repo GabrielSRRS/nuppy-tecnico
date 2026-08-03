@@ -3,6 +3,12 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator";
 
 import { cn } from "@/lib/utils";
 
+/*
+  Separator
+  - Linha separadora horizontal ou vertical utilizada para dividir visualmente seções.
+  - Recebe `orientation` para alternar entre horizontal/vertical e `decorative` quando
+    for puramente visual (sem impacto semântico).
+*/
 const Separator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>

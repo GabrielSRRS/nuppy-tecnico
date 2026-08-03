@@ -4,6 +4,17 @@ import { Minus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/*
+  InputOTP
+  - Peça de UI para input de códigos OTP (one-time password), composto por vários slots
+    que representam cada dígito/caracter do código.
+  - Suporta estilos customizados via containerClassName e className.
+
+  Subcomponentes:
+  - InputOTPGroup: container flexível para agrupar os slots
+  - InputOTPSlot: representa um slot individual; lê contexto para saber char/isActive
+  - InputOTPSeparator: componente visual que pode separar grupos (ex.: 123-456)
+*/
 const InputOTP = React.forwardRef<
   React.ElementRef<typeof OTPInput>,
   React.ComponentPropsWithoutRef<typeof OTPInput>
@@ -35,6 +46,11 @@ const InputOTPSlot = React.forwardRef<
   const inputOTPContext = React.useContext(OTPInputContext);
   const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index];
 
+  /*
+    - Exibe o caractere do slot quando presente.
+    - Quando `hasFakeCaret` é true, desenha um caret (barra piscante) para indicar foco/
+      inserção, melhorando a experiência do usuário.
+  */
   return (
     <div
       ref={ref}

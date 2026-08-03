@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
 import { type VariantProps } from "class-variance-authority";
@@ -7,6 +5,11 @@ import { type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { toggleVariants } from "@/components/ui/toggle";
 
+/*
+  ToggleGroup
+  - Agrupa múltiplos ToggleItems compartilhando variantes (variant, size) via contexto.
+  - Facilita manter consistência quando se tem um grupo de toggles com mesmas propriedades.
+*/
 const ToggleGroupContext = React.createContext<VariantProps<typeof toggleVariants>>({
   size: "default",
   variant: "default",
