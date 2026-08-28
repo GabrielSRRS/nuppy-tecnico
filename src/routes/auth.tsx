@@ -108,9 +108,31 @@ function AuthPage() {
 
   // Se já está logado, manda direto para /home.
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/home", replace: true });
+    let active = true;
+
+    // Restaura a sessão já existente sem bloquear o formulário.
+    supabase.auth.getSession().then(({ data }) => {
+      if (active && data.session?.user) {
+        navigate({ to: "/home", replace: true });
+      }
     });
+
+    // Garante que o redirecionamento aconteça somente quando o Supabase
+    // confirmar que a sessão foi realmente criada (inclusive após OAuth).
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active || !session?.user) return;
+      if (event === "SIGNED_IN") {
+        // Deixa o callback do Supabase terminar antes de navegar.
+        setTimeout(() => {
+          if (active) navigate({ to: "/home", replace: true });
+        }, 0);
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.subscription.unsubscribe();
+    };
   }, [navigate]);
 
   // Barrinha de força da senha
@@ -135,11 +157,13 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim().toLowerCase(),
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            // O callback volta para /auth. A tela detecta a sessão e então
+            // encaminha para /home quando a confirmação for concluída.
+            emailRedirectTo: `${window.location.origin}/auth`,
             data: {
               display_name: name.trim(),
               full_name: name.trim(),
@@ -150,30 +174,50 @@ function AuthPage() {
         });
         if (error) throw error;
 
-        // Depois do signup, o trigger cria a linha em profiles.
-        // Se a sessão existe (email confirmado desligado), grava a cidade.
-        const { data: session } = await supabase.auth.getUser();
-        if (session.user && city.trim()) {
-          await supabase.from("profiles").update({ city: city.trim() }).eq("id", session.user.id);
+        if (data.user && data.session) {
+          // Confirmação de e-mail desativada: a sessão já existe.
+          if (city.trim()) {
+            const { error: profileError } = await supabase
+              .from("profiles")
+              .update({ city: city.trim() })
+              .eq("id", data.user.id);
+            if (profileError) console.warn("Não foi possível salvar a cidade:", profileError);
+          }
+          toast.success("Conta criada! Bem-vindo(a) ao Nuppy 🐾");
+          navigate({ to: "/home", replace: true });
+        } else {
+          // Com confirmação de e-mail ativa, não existe sessão ainda.
+          toast.success("Conta criada! Verifique seu e-mail para confirmar o cadastro.");
+          setMode("login");
+          setPassword("");
+          setConfirmPwd("");
         }
-
-        toast.success("Conta criada! Bem-vindo(a) ao Nuppy 🐾");
-        navigate({ to: "/home", replace: true });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
         if (error) throw error;
+        if (!data.session?.user) {
+          throw new Error("Não foi possível criar a sessão. Tente novamente.");
+        }
         toast.success("Boas-vindas de volta!");
         navigate({ to: "/home", replace: true });
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro ao autenticar";
       // Traduz erros comuns do Supabase.
-      const friendly = msg.includes("Invalid login")
+      const lower = msg.toLowerCase();
+      const friendly = lower.includes("invalid login") || lower.includes("invalid credentials")
         ? "Email ou senha incorretos"
-        : msg.includes("already registered") || msg.includes("already been registered")
+        : lower.includes("email not confirmed")
+        ? "Confirme seu e-mail antes de entrar"
+        : lower.includes("already registered") || lower.includes("already been registered")
         ? "Este email já está cadastrado — faça login"
-        : msg.includes("Password should be")
+        : lower.includes("password should be")
         ? "Senha muito curta (mínimo 6 caracteres)"
+        : lower.includes("rate limit")
+        ? "Muitas tentativas. Aguarde alguns minutos e tente novamente."
         : msg;
       toast.error(friendly);
     } finally {
